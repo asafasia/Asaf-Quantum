@@ -1,30 +1,10 @@
-from laboneq.simple import *
-from pathlib import Path
-import time
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
-
-from laboneq.contrib.example_helpers.plotting.plot_helpers import (
-    plot_results,
-    plot_simulation,
-)
-
+from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
 from helper.kernels import kernels
 from helper.exp_helper import *
 from helper.pulses import *
 from qubit_parameters import qubit_parameters, update_qp
-
-from laboneq.contrib.example_helpers.data_analysis.data_analysis import fit_Spec
-import scipy.optimize as opt
-
-import json
-from datetime import datetime
-import os
-
-from collections import OrderedDict
-
-import importlib
 
 
 # %%
@@ -142,6 +122,7 @@ class QubitSpectroscopy:
         self.experiment = exp_qspec
 
     def run_exp(self):
+        self.add_experiment()
         center = self.center
         compiled_qspec = self.session.compile(self.experiment)
 
@@ -153,11 +134,6 @@ class QubitSpectroscopy:
         results = qspec_results.get_data("qubit_spec")
 
         amplitude = np.abs(results)
-        # amplitude = correct_axis(amplitude,qubit_parameters[qubit]["ge"])
-
-        phase_radians = np.unwrap(np.angle(results))
-
-        drive_amp = qubit_parameters[self.qubit]['drive_amp'] * self.amp
 
         flux_bias = qubit_parameters[self.qubit]['flux_bias']
 
@@ -177,12 +153,9 @@ class QubitSpectroscopy:
                 f'Qubit Spectroscopy {qubit} w1\n drive amp = {amp:5f} V \n flux bias = {flux_bias:.5f} V \nresonanance = {center * 1e-6:.2f} MHz  ',
                 fontsize=18)
 
-        # center*1e-9
-        # plt.ylim([-0.2,1.2])
         decimal_places = 1
         plt.gca().xaxis.set_major_formatter(StrMethodFormatter(f"{{x:,.{decimal_places}f}}"))
-        # detuning plot
-        # plt.plot((dfs - center)*1e-6, amplitude, "k")
+
         if self.center_axis:
             plt.plot((self.dfs - center) * 1e-6, amplitude, "k")
             plt.axvline(x=0, color='green', linestyle='--', label='current')
@@ -193,9 +166,6 @@ class QubitSpectroscopy:
             plt.axvline(x=center * 1e-6, color='green', linestyle='--', label='current')
             plt.axvline(x=self.max_freq * 1e-6, color='blue', linestyle='--', label='new')
 
-        # plt.ylim([0,1])
-
-        # plt.plot(dfs*1e-6 - center*1e-6,func_lorentz(dfs,*popt))
         plt.xlabel('Detuning [MHz]')
         plt.ylabel('Amplitude [a.u.]')
         plt.legend()
@@ -205,7 +175,6 @@ class QubitSpectroscopy:
 
         detuning = self.max_freq - self.center
         print(f'current detuning: {detuning * 1e-6} [MHz]')
-        self._update_vector()
 
         if self.update_flux and self.w0 == True:
             print('old_flux_point = :', self.flux_bias)
@@ -235,7 +204,9 @@ class QubitSpectroscopy:
 
             if user_input == 'y':
                 update_qp(self.qubit, update_string, self.max_freq)
-
+                self.center = self.max_freq
+                self.dfs = np.linspace(start=self.center - self.span / 2, stop=self.center + self.span / 2,
+                                       num=self.steps)  # for carrier calculation
                 print('updated !!!')
 
             elif user_input == 'n':
@@ -243,18 +214,18 @@ class QubitSpectroscopy:
             else:
                 raise Exception("Invalid input")
 
+        self._update_vector()
 
-# %%
 
 if __name__ == '__main__':
 
     args = {
         'qubit': 'q3',
-        'n_avg': 500,
+        'n_avg': 400,
         'simulate': False,
-        'amp': 1 / 20,
-        'span': 100e6,
-        'steps': 101,
+        'amp': 1 / 200,
+        'span': 10e6,
+        'steps': 201,
         'w0': True,
         'center_axis': True,
         'ground_max': False,
@@ -263,19 +234,11 @@ if __name__ == '__main__':
         'mode': 'spec'
     }
 
-    # %%
-
     qs = QubitSpectroscopy(**args)
-    # qs.run_exp()
-    # qs.update()
-
-    # %%
-    n = 5
+    n = 7
 
     for i in range(n):
         print('number: ', i)
-        qs.add_experiment()
         qs.run_exp()
         qs.update()
-
-
+        print('############## center = ', qs.center * 1e-6, 'MHz ##################')

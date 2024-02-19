@@ -29,6 +29,6 @@ plt.plot(range(n), vec_1, label='q5')
 # plt.plot(range(n), vec_2, label='q3')
 # plt.plot(range(n), vec_3, label='q4')
 # plt.plot(range(n), vec_4, label='q5')
-
+plt.ylim([0,1])
 plt.legend()
 plt.show()

@@ -37,7 +37,7 @@ from qubit_parameters import qubit_parameters, update_qp
 # %% devise setup
 qubit = "q3"
 
-mode = 'disc'
+mode = 'int'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY

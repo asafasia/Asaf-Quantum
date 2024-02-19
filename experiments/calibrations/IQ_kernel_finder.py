@@ -1,37 +1,11 @@
-from laboneq.simple import *
-from numpy.typing import NDArray
-from zhinst.utils.shfqa.multistate import QuditSettings
-from laboneq.dsl.experiment import pulse_library as pl
-
-import numpy as np
 import matplotlib.pyplot as plt
-
 from helper import project_path
-from helper.kernels import kernels
 from helper.exp_helper import *
-from helper.pulses import *
-from qubit_parameters import qubit_parameters, update_qp
 from pulses import *
 from qubit_parameters import *
-
 from laboneq.contrib.example_helpers.plotting.plot_helpers import (
-    plot_results,
     plot_simulation,
 )
-
-from laboneq.contrib.example_helpers.generate_example_datastore import (
-    generate_example_datastore,
-    get_first_named_entry,
-)
-
-from pprint import pprint
-
-from laboneq.contrib.example_helpers.feedback_helper import (
-    state_emulation_pulse,
-    create_calibration_experiment,
-    create_discrimination_experiment,
-)
-
 # %% devise setup
 qubit = "q3"
 
