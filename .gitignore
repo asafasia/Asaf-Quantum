@@ -1,32 +1,13 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+.idea/.name
+experiments/academic/Spin Locking/laboneq_output/log/controller.log
+experiments/academic/Spin Locking/laboneq_output/log/node.log
+experiments/academic/Spin Locking/spin_locking_nt.py
+experiments/calibrations/laboneq_output/log/controller.log
+experiments/calibrations/laboneq_output/log/node.log
+experiments/calibrations/qubit_vs_flux_bias_spec.py
+experiments/calibrations/SingleQubitRB.py
+helper/utility_functions.py
+main.py
+*.log
+*.log
+*.log

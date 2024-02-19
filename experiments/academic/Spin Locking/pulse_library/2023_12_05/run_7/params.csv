@@ -1,0 +1,3 @@
+,qubit_freq,rabi_freq,anharmonicity,N_levles,p_drag,ramp_length_ns,sample_rate,detuning_scan
+0,4428.64,70.0,213.92,5,-16,200,500,0.6283185307179586
+1,4428.64,70.0,213.92,5,-16,200,500,62.83185307179586

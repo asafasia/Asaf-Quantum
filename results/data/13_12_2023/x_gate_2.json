@@ -1,0 +1,38 @@
+{
+    "meta_data": {
+        "type": "1d",
+        "plot_properties": {
+            "x_label": "X90 Gate Number",
+            "y_label": "Amplitude [a.u.]",
+            "title": "T1 Experiment"
+        },
+        "experiment_properties": {
+            "qubit": "q4",
+            "repetitions": 1000
+        },
+        "qubit_parameters": {
+            "qb_freq": 4323900000.0,
+            "drive_amp": 0.14,
+            "drive_len": 4e-05,
+            "pi_amp": 0.19,
+            "pi_len": 4e-08,
+            "res_freq": 5830500000.0,
+            "res_amp": 0.4,
+            "res_len": 2e-06,
+            "qb_amp_spec": 1.0,
+            "qb_lo": 4600000000.0,
+            "res_lo": 5600000000.0,
+            "flux_bias": -0.7602,
+            "anharmnonicity": 208390000.0,
+            "w125": 4326260000.0,
+            "ro_delay": 2e-08,
+            "ro_int_delay": 4e-08,
+            "angle": -3.202479846348694,
+            "ge": [
+                -0.0003844919559967196,
+                -0.0002091801419585255
+            ]
+        }
+    },
+    "data": {
+        "x_data": 

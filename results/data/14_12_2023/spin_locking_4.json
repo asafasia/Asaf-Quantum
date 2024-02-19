@@ -1,0 +1,11 @@
+{
+    "meta_data": {
+        "type": "2d",
+        "plot_properties": null,
+        "experiment_properties": {
+            "qubit": "q4",
+            "repetitions": 1000,
+            "ramp_pulse": 0.6047595847658678,
+            "ramp_length": 2e-07,
+            "f_rabi": 70000000.0,
+            "detunings": 
