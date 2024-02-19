@@ -21,9 +21,9 @@ from helper.pulses import *
 from qubit_parameters import *
 
 # %% parameters
-qubit = "q5"
+qubit = "q4"
 
-mode = 'disc'
+mode = 'spec'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY

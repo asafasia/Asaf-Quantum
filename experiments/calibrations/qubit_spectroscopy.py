@@ -18,9 +18,9 @@ import scipy.optimize as opt
 
 
 # %% parameters
-qubit = "q5"
+qubit = "q4"
 
-mode = 'disc'
+mode = 'spec'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY
@@ -48,8 +48,8 @@ save_labber=True
 update_flux = False
 simulate = False
 n_avg = 300
-amp = 1 / 2000  # ~0.4 (q3) for 2nd E level, 1/100 for 1st E level
-w0 = True
+amp = 1 / 2  # ~0.4 (q3) for 2nd E level, 1/100 for 1st E level
+w0 = False
 plot_from_json = False
 center_axis = True
 ground_max = False
@@ -60,7 +60,7 @@ if w0:
 else:
     center = qubit_parameters[qubit]["w125"]
 
-span = 0.2e6
+span = 300e6
 steps = 201
 
 drive_LO = qubit_parameters[qubit]["qb_lo"]

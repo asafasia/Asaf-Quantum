@@ -3,11 +3,9 @@ from helper import project_path
 from helper.exp_helper import *
 from pulses import *
 from qubit_parameters import *
-from laboneq.contrib.example_helpers.plotting.plot_helpers import (
-    plot_simulation,
-)
+from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
 # %% devise setup
-qubit = "q3"
+qubit = "q4"
 
 exp = initialize_exp()
 device_setup = exp.create_device_setup(modulation_type='software')
@@ -21,10 +19,9 @@ session.connect(do_emulation=False)
 # %% parameters
 simulate = False
 show_clouds = False
-exp_repetitions = 32000  # used for 2^n averages, n=average_exponent, maximum: n = 19
+exp_repetitions = 32000
 
 # %%
-
 exp_0 = Experiment(
     uid="Optimal weights",
     signals=exp_signals

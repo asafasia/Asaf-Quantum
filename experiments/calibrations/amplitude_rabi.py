@@ -1,13 +1,6 @@
-from laboneq.simple import *
 
-# Helpers:
-from laboneq.analysis.fitting import oscillatory
-from laboneq.contrib.example_helpers.plotting.plot_helpers import (
-    plot_results,
-    plot_simulation,
-)
+from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
 
-import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy.optimize import curve_fit
@@ -18,9 +11,9 @@ from helper.pulses import *
 from qubit_parameters import qubit_parameters, update_qp
 
 # %% parameters
-qubit = "q3"
+qubit = "q4"
 
-mode = 'disc'
+mode = 'spec'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY
@@ -97,7 +90,6 @@ exp_rabi.set_signal_map(signal_map_default)
 
 # %%
 compiled_rabi = session.compile(exp_rabi)
-compiled_rabi.save('compiled_rabi_NOT_QASM.json')
 if simulate:
     plot_simulation(compiled_rabi, start_time=0, length=15e-6)
 

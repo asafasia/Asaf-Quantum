@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 
-
 @dataclass
 class Plotter:
     meta_data: dict = None

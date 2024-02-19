@@ -1,37 +1,15 @@
-from laboneq.simple import *
-
-# additional imports needed for Clifford gate calculation
-import numpy as np
 import matplotlib.pyplot as plt
-
-# Helpers:
-from laboneq.contrib.example_helpers.randomized_benchmarking_helper import (
-    make_pauli_gate_map,
-    clifford_parametrized,
-    generate_play_rb_pulses,
-)
-
-from laboneq.contrib.example_helpers.plotting.plot_helpers import (
-    plot_results,
-    plot_simulation,
-)
-
-from helper.kernels import kernels
+from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
 from helper.exp_helper import *
 from helper.pulses import *
 from qubit_parameters import qubit_parameters, update_qp
-
-from pprint import pprint
-
 import json
 from datetime import datetime
 import os
-
 from collections import OrderedDict
-
 # %% devise setup
 
-qubit = "q3"
+qubit = "q4"
 
 exp = initialize_exp()
 device_setup = exp.create_device_setup()

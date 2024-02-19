@@ -58,8 +58,8 @@ class QubitSpectroscopy:
 
     def _update_vector(self):
         qubit = self.qubit
-        self.span = self.span / 1.5
-        self.amp = self.amp / 1.5
+        self.span = self.span / 2
+        self.amp = self.amp / 2
         drive_LO = qubit_parameters[qubit]["qb_lo"]
 
         self.dfs = np.linspace(start=self.center - self.span / 2, stop=self.center + self.span / 2,
@@ -220,17 +220,17 @@ class QubitSpectroscopy:
 if __name__ == '__main__':
 
     args = {
-        'qubit': 'q3',
+        'qubit': 'q4',
         'n_avg': 400,
         'simulate': False,
-        'amp': 1 / 200,
-        'span': 10e6,
+        'amp': 1 / 10,
+        'span': 100e6,
         'steps': 201,
         'w0': True,
         'center_axis': True,
         'ground_max': False,
-        'p': 1,
-        'update_flux': False,
+        'p': 0.7,
+        'update_flux': True,
         'mode': 'spec'
     }
 

@@ -1,18 +1,6 @@
 from laboneq.simple import *
-import numpy as np
-from pathlib import Path
-import time
-from numpy.typing import NDArray
-from laboneq.dsl.experiment import pulse_library as pl
-from zhinst.utils.shfqa.multistate import QuditSettings
 from .qdac import play_flux_qdac
-
-from pprint import pprint
-from laboneq.contrib.example_helpers.generate_example_datastore import generate_device_setup
-# import Labber
-
 from qubit_parameters import qubit_parameters
-
 from .descriptor import descriptor
 
 
@@ -279,76 +267,5 @@ class initialize_exp:
             ]
 
         return signals
-
-
-# drive_amp = qubit_parameters["q3"]["drive_amp"]
-# drive_len = qubit_parameters["q3"]["drive_len"]
-# res_amp= qubit_parameters["q3"]["res_amp"]
-# measure_length = qubit_parameters["q3"]["res_len"]
-
-
-# flux_pulse_length = 120e-6#drive_len+2*measure_length
-# amplitude_flux = 1
-
-# flux_pulse = pulse_library.const(
-#     uid="flux_spec_pulse_c13", length=flux_pulse_length, amplitude=amplitude_flux
-# )
-
-
-def create_drive_freq_sweep(qubit, start_freq, stop_freq, num_points):
-    return LinearSweepParameter(
-        uid=f"drive_freq_{qubit}", start=start_freq, stop=stop_freq, count=num_points
-    )
-
-
-def calculate_integration_kernels(
-        state_traces: list[NDArray],
-) -> list[pl.PulseSampledComplex]:
-    """Calculates the optimal kernel arrays for state discrimination given a set of
-    reference traces corresponding to the states. The calculated kernels can directly be
-    used as kernels in acquire statements.
-
-    Args:
-        state_traces: List of complex-valued reference traces, one array per state. The
-            reference traces are typically obtained by an averaged scope measurement of
-            the readout resonator response when the qudit is prepared in a certain
-            state.
-
-    """
-
-    n_traces = len(state_traces)
-    settings = QuditSettings(state_traces)
-
-    weights = settings.weights[: n_traces - 1]
-
-    return [pl.sampled_pulse_complex(weight.vector) for weight in weights]
-
-
-def save_func(session, file_name):
-    timestamp = time.strftime("%Y%m%dT%H%M%S")
-    Path("Results").mkdir(parents=True, exist_ok=True)
-    session.save_results(f"Results/{timestamp}_coupler_spec.json")
-
-
-def correct_axis(amplitudes, ge):
-    return (amplitudes - ge[0]) / (ge[1] - ge[0])
-
-
-# %%load kernel for qubits
-
-# for qubit_key, qubit_info in qubit_parameters.items():
-#     # Check if the current entry is for a qubit
-#     if qubit_info.get("qb_freq") is not None:
-#         # Generate the file name based on the qubit key
-#         traces_filename = f"traces_{qubit_key}"
-
-#     if traces_filename is not None:
-#         # Load the kernel from the file
-
-#         kernel = np.load(traces_filename)
-#         globals()[f"kernel_{qubit_key}"] = kernel
-
-#         print(f"Kernel for {qubit_key} loaded as {kernel_name}")
-import numpy as np
 
 
