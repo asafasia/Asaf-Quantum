@@ -2,21 +2,31 @@ import matplotlib.pyplot as plt
 from laboneq.contrib.example_helpers.plotting.plot_helpers import (
     plot_simulation,
 )
-from laboneq.simple import *
-import numpy as np
 from scipy.optimize import curve_fit
 
-from helper import pulses, exp_helper, utility_functions
-from helper.plotter import Plotter
+from helper.exp_helper import *
+from helper.kernels import kernels
+from helper.pulses import *
 from qubit_parameters import qubit_parameters
-from helper.experiment_results import ExperimentData
-from scipy.optimize import curve_fit
 
 # %% devise setup
-qubit = "q1"
+qubit = "q5"
 
-exp = exp_helper.initialize_exp()
-device_setup = exp.create_device_setup()
+mode = 'int'
+modulation_type = 'hardware' if mode == 'spec' else 'software'
+if mode == 'spec':
+    acquisition_type = AcquisitionType.SPECTROSCOPY
+elif mode == 'int':
+    acquisition_type = AcquisitionType.INTEGRATION
+elif mode == 'disc':
+    acquisition_type = AcquisitionType.DISCRIMINATION
+
+kernel = readout_pulse(qubit) if mode == 'spec' else kernels[qubit]
+
+# %%
+
+exp = initialize_exp()
+device_setup = exp.create_device_setup(modulation_type=modulation_type)
 signal_map_default = exp.signal_map_default(qubit)
 exp_signals = exp.signals(qubit)
 # %%
@@ -25,119 +35,119 @@ session.connect(do_emulation=False)
 
 # %% Experiment Parameters
 simulate = False
-points = 50
-exp_repetitions = 10000
+points = 15
+exp_repetitions = 1000
 
 
 # %% Experiment Definition
+
+
 def x_gate_rep():
     exp_rabi = Experiment(
         uid="Amplitude Rabi",
-        signals=[
-            ExperimentSignal("measure"),
-            ExperimentSignal("acquire"),
-            ExperimentSignal(f"drive_{qubit}"),
-        ]
+        signals=exp_signals
     )
 
     with exp_rabi.acquire_loop_rt(
             uid="rabi_shots",
             count=exp_repetitions,
             averaging_mode=AveragingMode.CYCLIC,
-
-            acquisition_type=AcquisitionType.SPECTROSCOPY):
+            acquisition_type=acquisition_type):
 
         for i in range(points):
             with exp_rabi.section(alignment=SectionAlignment.RIGHT):
                 for i in range(i):
                     exp_rabi.play(signal=f"drive_{qubit}",
-                                  pulse=pulses.pi_pulse(qubit), amplitude=1 / 2, )
+                                  pulse=pi_pulse(qubit), amplitude=1 / 2, )
 
             with exp_rabi.section():
                 exp_rabi.reserve(f"drive_{qubit}")
 
                 exp_rabi.play(signal="measure",
-                              pulse=pulses.readout_pulse(qubit),
-                              phase=qubit_parameters[qubit]['angle'])
+                              pulse=readout_pulse(qubit),
+                              phase=0
+                              )
 
                 exp_rabi.acquire(
                     signal="acquire",
                     handle="amp_rabi",
-                    length=qubit_parameters[qubit]["res_len"],
+                    kernel=kernel,
 
                 )
             with exp_rabi.section(uid="delay"):
                 exp_rabi.reserve(f"drive_{qubit}")
 
-                exp_rabi.delay(signal="measure", time=100e-6)
+                exp_rabi.delay(signal="measure", time=120e-6)
 
     return exp_rabi
 
 
 # %% create experiment
+
 x_gate_rep = x_gate_rep()
-signal_map_default = {f"drive_{qubit}": device_setup.logical_signal_groups[qubit].logical_signals["drive_line"],
-                      "measure": device_setup.logical_signal_groups[qubit].logical_signals["measure_line"],
-                      "acquire": device_setup.logical_signal_groups[qubit].logical_signals["acquire_line"]}
+
 x_gate_rep.set_signal_map(signal_map_default)
 
 # %% Compile
-compiled_rabi = session.compile(x_gate_rep)
+compiler_settings = {"SHFSG_MIN_PLAYWAVE_HINT": 128, "SHFSG_MIN_PLAYZERO_HINT": 256}
+
+compiled_rabi = session.compile(x_gate_rep, compiler_settings=compiler_settings)
+
 if simulate:
     plot_simulation(compiled_rabi, start_time=0, length=1e-3)
 
-# %% plot
+# %%
 rabi_results = session.run()
+
+# %% plot
 
 acquire_results = rabi_results.get_data("amp_rabi")
 amplitude = acquire_results.real
-amplitude = utility_functions.correct_axis(amplitude, qubit_parameters[qubit]["ge"])
+amplitude_I = acquire_results.imag
+amplitude_half = np.abs(acquire_results[1:-1:2])
+amplidute_for_fit = np.abs(acquire_results[1:-1:4])
+# amplitude = correct_axis(amplitude,qubit_parameters[qubit]["ge"])
 amp_mean = np.mean(amplitude)
 pi_amp = qubit_parameters[qubit]['pi_amp']
 
+x = range(points)
+x_half = x[1:-1:2]
+x_for_fit = x[1:-1:4]
+
 plt.title(f'X Gate Repetitions Experimnet {qubit}')
-plt.axhline(y=0.5, color='black')
-plt.plot(range(points), amplitude, '.')
-plt.plot(range(points)[1:-1:2], amplitude[1:-1:2])
+plt.title('NOT QASM, X gate, PHASE = pi/2')
+# plt.axhline(y=0.5,color = 'black')
+# plt.plot(range(points), amplitude, '.')
+plt.plot(range(points), amplitude, label='Real')
+plt.plot(range(points), amplitude_I, label='Imag')
+plt.legend()
 
 
+# plt.plot(x_half, amplitude_half, '.', color='green')
+# plt.plot(x_half, amplitude_half)
+#
+# plt.plot(x_for_fit, amplidute_for_fit, '.', color='green')
+# plt.plot(x_for_fit, amplidute_for_fit)
 
-plt.plot(range(points), amplitude)
-plt.xlabel('X90 Gate Number')
-plt.ylabel('Amplitude [a.u.]')
-plt.text(points - 1 / 2 * points, max(amplitude) * 1, f'drive amp = {pi_amp:.4f} Volt')
+
+def sin(x, amplitude, T, phase, offset):
+    return amplitude * np.sin(2 * np.pi / (T * 2) * x + np.pi) + 1 / 2
+
+
+try:
+    args = curve_fit(sin, x_for_fit, amplidute_for_fit, p0=[0.3, 100, 0, 0.5])[0]
+
+    T = abs(args[1])
+    print("T = ", T)
+
+    new_amplitude = qubit_parameters[qubit]['pi_amp'] * (1 - 2 / T)
+
+    # plt.plot(x_for_fit, sin(x_for_fit, *args), color='red')
+    print("old amplitude = ", qubit_parameters[qubit]['pi_amp'])
+    print("new amplitude = ", new_amplitude)
+except:
+    print("fit failed")
+
+plt.xlabel('Number of X/2 Gates')
+plt.ylabel('Population')
 plt.show()
-
-
-# vec = amplitude[1:-1:2]
-
-
-
-
-# args = curve_fit('cos', range(len(vec)), vec, p0=[1, 1, 1, 1])
-
-
-# %% save
-meta_data = {
-    'type': '1d',
-    'plot_properties':
-        {
-            'x_label': 'X90 Gate Number',
-            'y_label': 'Amplitude [a.u.]',
-            'title': 'T1 Experiment'
-        },
-    'experiment_properties':
-        {
-            'qubit': qubit,
-            'repetitions': exp_repetitions,
-        },
-    'qubit_parameters': qubit_parameters[qubit],
-}
-
-data = {
-    'x_data': list(range(points)),
-    'y_data': amplitude
-}
-
-exp_data = ExperimentData(meta_data=meta_data, data=data)
-exp_data.save_data(file_name='x_gate')
