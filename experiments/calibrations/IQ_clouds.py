@@ -159,18 +159,6 @@ if not do_emulation and mode == 'int':
     # update_qp(qubit, 'ge', [m1.real,m2.real])
 
 
-# %% x axis number formatting
-
-# Define a custom formatter function
-def custom_formatter(value, _):
-    if value < 1:
-        return f"{value * 1e3:.2f}"  # Convert to milli and show one decimal place
-    else:
-        return f"{value * 1e-3:.0e}"  # Convert to kilo and use scientific notation
-
-
-# Apply the custom formatter to the x-axis
-
 
 # %% clouds
 if show_clouds:
@@ -185,8 +173,7 @@ if show_clouds:
     plt.xlabel('I [a.u.]', )
     plt.ylabel('Q [a.u.]')
     plt.legend()
-    # plt.gca().xaxis.set_major_formatter(FuncFormatter(custom_formatter))
-    # plt.gca().yaxis.set_major_formatter(FuncFormatter(custom_formatter))
+
     plt.show()
 
 # %% histogram

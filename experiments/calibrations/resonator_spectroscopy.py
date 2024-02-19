@@ -7,9 +7,10 @@ import json
 from datetime import datetime
 import os
 from collections import OrderedDict
+
 # %% devise setup
 
-qubit = "q4"
+qubit = "q2"
 
 exp = initialize_exp()
 device_setup = exp.create_device_setup()
@@ -36,12 +37,8 @@ CF_freq_vec = np.linspace(start=central_frequency - freq_range / 2,
                           stop=central_frequency + freq_range / 2, num=steps)  # for carrier calculation
 
 res_LO = qubit_parameters[qubit]["res_lo"]
-float_freq_sweep = (CF_freq_vec - res_LO)  # carrier freq sweep
 
-int_freq_sweep = float_freq_sweep.astype(int)
-
-freq_sweep_q0 = create_drive_freq_sweep(
-    qubit, int_freq_sweep[0], int_freq_sweep[-1], steps)  # sweep object
+freq_sweep_q0 = SweepParameter(uid='freq_sweep', values=CF_freq_vec - res_LO)  # sweep object
 
 
 # %% pulse parameters and definiations
@@ -120,7 +117,6 @@ compiled_qspec = session.compile(exp_qspec)
 if simulate:
     plot_simulation(compiled_qspec, )
 # %% plot
-Freq_sweep_vec = res_LO + int_freq_sweep
 
 res_spec = session.run(compiled_qspec)
 
@@ -158,110 +154,17 @@ acquire_results_2 = res_spec.get_data("spec_2")
 
 # %% set plotting variables
 # **** don't forget to update file path
-if plot_from_json:
 
-    file_path = r'C:\Users\stud\Documents\GitHub\qhipu-files\LabOne Q\Exp_results\2023-12-20_results\resonator_spectroscopy_q1_11-43-22.json'
-    with open(file_path, 'r') as json_file:
-        data = json.load(json_file)
+amplitude_1 = np.abs(acquire_results_1)
+amplitude_2 = np.abs(acquire_results_2)
 
-    res_freq_GHz = data["plot_vectors"]["res_freq_GHz"]
-    amplitude_1 = data["plot_vectors"]["amplitude_1"]
-    amplitude_2 = data["plot_vectors"]["amplitude_2"]
-    phase_radians_1 = data["plot_vectors"]["phase_radians_1"]
-    phase_radians_2 = data["plot_vectors"]["phase_radians_2"]
+phase_radians_1 = np.unwrap(np.angle(acquire_results_1)) * amplitude_1
+phase_radians_2 = np.unwrap(np.angle(acquire_results_2)) * amplitude_2
 
-else:
-    amplitude_1 = np.abs(acquire_results_1)
-    amplitude_2 = np.abs(acquire_results_2)
-
-    phase_radians_1 = np.unwrap(np.angle(acquire_results_1)) * amplitude_1
-    phase_radians_2 = np.unwrap(np.angle(acquire_results_2)) * amplitude_2
-
-    # Convert res_freq to GHz
-    res_freq_GHz = Freq_sweep_vec * 1e-9
+# Convert res_freq to GHz
+res_freq_GHz = CF_freq_vec * 1e-9
 # save results to json file
 
-if not plot_from_json:
-
-    # plot vectors
-
-    plot_vectors = {
-        'res_freq_GHz': res_freq_GHz.tolist(),
-        'amplitude_1': amplitude_1.tolist(),
-        'amplitude_2': amplitude_2.tolist(),
-        'phase_radians_1': phase_radians_1.tolist(),
-        'phase_radians_2': phase_radians_2.tolist(),
-    }
-
-    # Additional experiment parameters
-    experiment_parameters = {
-        'long_pulse': long_pulse,
-
-        'num_averages': num_averages,
-        'freq_range': freq_range,
-        'steps': steps,
-    }
-
-    experiment_parameters = OrderedDict(experiment_parameters)
-    # Add experiment parameters to the data dictionary
-
-    # New parameter: experiment string
-    experiment_string = """
-    with exp_qspec.acquire_loop_rt(
-        uid="freq_shots",
-        count=num_averages,
-        acquisition_type=AcquisitionType.SPECTROSCOPY,
-    ):
-        for i in range(2):
-            with exp_qspec.sweep(parameter=freq_sweep):
-                # qubit drive
-                with exp_qspec.section():
-                    if i == 1:
-                        if long_pulse:    
-                            exp_qspec.play(signal=f"drive_{qubit}", pulse=spec_pulse(qubit))
-                        else:
-                            exp_qspec.play(signal=f"drive_{qubit}", pulse=pi_pulse(qubit))
-                    else:
-                        exp_qspec.delay(signal=f"drive_{qubit}", time=0e-9)
-                with exp_qspec.section():
-                    exp_qspec.reserve(f"drive_{qubit}")
-                    # play readout pulse on measure line
-                    exp_qspec.play(signal="measure", pulse=readout_pulse(qubit))
-                    # trigger signal data acquisition
-                    exp_qspec.acquire(
-                        signal="acquire",
-                        handle=f"spec_{i+1}",
-                        length=qubit_parameters[qubit]["res_len"],
-                    )
-                with exp_qspec.section():  # delay between consecutive experiment
-                    # relax time after readout - for qubit relaxation to groundstate and signal processing
-                    exp_qspec.delay(signal="measure", time=120e-6)
-    return exp_qspec
-    """
-
-    data = {
-        'experiment_parameters': experiment_parameters,
-        'plot_vectors': plot_vectors,
-        'qubit_parameters': qubit_parameters,
-    }
-
-    data['experiment'] = experiment_string.strip()
-
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    # Create a folder based on the current date if it doesn't exist
-    folder_path = os.path.join("C:/Users/stud/Documents/GitHub/qhipu-files/LabOne Q/Exp_results",
-                               f"{current_date}_results")
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-
-    # Generate a unique filename based on the current time
-    current_time = datetime.now().strftime("%H-%M-%S")
-    filename = os.path.join(folder_path, f"resonator_spectroscopy_{qubit}_{current_time}.json")
-
-    with open(filename, 'w') as json_file:
-        json.dump(data, json_file)  # Adding indent for better readability
-
-    print(f"Data saved to {filename}")
 
 # %%
 diff = abs(amplitude_2 - amplitude_1)
@@ -284,6 +187,7 @@ fig.suptitle(
 # Plot the amplitude in the first subplot
 axes[0].plot(res_freq_GHz, amplitude_1, color='blue', marker='.', label='with_drive')
 axes[0].plot(res_freq_GHz, amplitude_2, color='green', marker='.', label='without_drive')
+axes[2].set_xlabel('Frequency [GHz]')
 
 axes[0].set_xlabel('Frequency [GHz]')
 axes[0].set_ylabel('Amplitude [a.u.]')
@@ -310,16 +214,12 @@ axes[1].legend()
 axes[0].legend()
 axes[2].legend()
 
-# Set a single big title for the entire figure
-
-# Adjust layout and display the plot
 plt.tight_layout()
 plt.show()
 
 GateStore()
 
 # %% update
-
 user_input = input("Do you want to update the pi amplitude? [y/n]")
 
 if user_input == 'y':

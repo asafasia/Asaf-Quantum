@@ -4,6 +4,7 @@ from helper.exp_helper import *
 from pulses import *
 from qubit_parameters import *
 from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
+
 # %% devise setup
 qubit = "q4"
 
@@ -103,14 +104,9 @@ m0 = np.mean(np.abs(raw_0))
 m1 = np.mean(np.abs(raw_1))
 
 time = np.linspace(0, len(raw_0) / 2, len(raw_0))
-# for groundstate
 plt.plot(time, np.abs(raw_0), alpha=0.5, label='ground')
-# plt.plot(time, np.imag(raw_0), "-b")
-# # for excited state
 plt.plot(time, np.abs(raw_1), alpha=0.5, label='excited')
-# # plt.plot(time, np.imag(raw_1), "-r")
 plt.axhline(y=m0)
-
 plt.axhline(y=m1)
 
 plt.xlabel("Time (ns)")
@@ -121,7 +117,6 @@ plt.show()
 # %%
 
 plt.title(f"raw iq {qubit}")
-
 plt.plot(raw_0.real, raw_0.imag, '.', alpha=0.5)
 plt.plot(raw_1.real, raw_1.imag, '.', alpha=0.5)
 plt.show()

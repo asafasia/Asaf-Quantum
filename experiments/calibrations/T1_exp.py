@@ -1,20 +1,6 @@
-# LabOne Q:
-from laboneq.simple import *
-
-# Helpers:
-from laboneq.analysis.fitting import oscillatory
-from laboneq.contrib.example_helpers.plotting.plot_helpers import (
-    plot_results,
-    plot_simulation,
-)
-
-from pathlib import Path
-import time
-
-import numpy as np
+from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-
 from helper.kernels import kernels
 from helper.exp_helper import *
 from helper.pulses import *
