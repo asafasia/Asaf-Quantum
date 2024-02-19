@@ -31,7 +31,7 @@ from collections import OrderedDict
 
 # %% devise setup
 
-qubit = "q5"
+qubit = "q3"
 
 exp = initialize_exp()
 device_setup = exp.create_device_setup()
@@ -41,7 +41,7 @@ exp_signals = exp.signals(qubit)
 # %%
 
 session = Session(device_setup=device_setup, )
-session.connect(do_emulation=False, reset_devices=True)
+session.connect(do_emulation=False)
 
 # %% parameters
 long_pulse = True

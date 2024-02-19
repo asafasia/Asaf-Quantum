@@ -12,7 +12,7 @@ from qubit_parameters import qubit_parameters
 # %% devise setup
 qubit = "q5"
 
-mode = 'disc'
+mode = 'int'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY
@@ -35,8 +35,8 @@ session.connect(do_emulation=False)
 
 # %% Experiment Parameters
 simulate = False
-points = 150
-exp_repetitions = 4000
+points = 15
+exp_repetitions = 1000
 
 
 # %% Experiment Definition
@@ -65,7 +65,7 @@ def x_gate_rep():
 
                 exp_rabi.play(signal="measure",
                               pulse=readout_pulse(qubit),
-                              phase=qubit_parameters[qubit]['angle']
+                              phase=0
                               )
 
                 exp_rabi.acquire(
@@ -102,7 +102,8 @@ rabi_results = session.run()
 # %% plot
 
 acquire_results = rabi_results.get_data("amp_rabi")
-amplitude = np.abs(acquire_results)
+amplitude = acquire_results.real
+amplitude_I = acquire_results.imag
 amplitude_half = np.abs(acquire_results[1:-1:2])
 amplidute_for_fit = np.abs(acquire_results[1:-1:4])
 # amplitude = correct_axis(amplitude,qubit_parameters[qubit]["ge"])
@@ -114,9 +115,13 @@ x_half = x[1:-1:2]
 x_for_fit = x[1:-1:4]
 
 plt.title(f'X Gate Repetitions Experimnet {qubit}')
+plt.title('NOT QASM, X gate, PHASE = pi/2')
 # plt.axhline(y=0.5,color = 'black')
-plt.plot(range(points), amplitude, '.')
-plt.plot(range(points), amplitude)
+# plt.plot(range(points), amplitude, '.')
+plt.plot(range(points), amplitude, label='Real')
+plt.plot(range(points), amplitude_I, label='Imag')
+plt.legend()
+
 
 # plt.plot(x_half, amplitude_half, '.', color='green')
 # plt.plot(x_half, amplitude_half)
@@ -126,7 +131,7 @@ plt.plot(range(points), amplitude)
 
 
 def sin(x, amplitude, T, phase, offset):
-    return amplitude * np.sin(2 * np.pi / (T*2) * x + np.pi) + 1/2
+    return amplitude * np.sin(2 * np.pi / (T * 2) * x + np.pi) + 1 / 2
 
 
 try:

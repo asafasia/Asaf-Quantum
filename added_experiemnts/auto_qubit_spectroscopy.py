@@ -252,8 +252,8 @@ if __name__ == '__main__':
         'qubit': 'q3',
         'n_avg': 500,
         'simulate': False,
-        'amp': 1 / 200,
-        'span': 1.5e6,
+        'amp': 1 / 20,
+        'span': 100e6,
         'steps': 101,
         'w0': True,
         'center_axis': True,
@@ -270,7 +270,7 @@ if __name__ == '__main__':
     # qs.update()
 
     # %%
-    n = 1
+    n = 5
 
     for i in range(n):
         print('number: ', i)

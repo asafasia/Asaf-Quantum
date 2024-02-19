@@ -33,7 +33,7 @@ from laboneq.contrib.example_helpers.feedback_helper import (
 )
 
 # %% devise setup
-qubit = "q5"
+qubit = "q3"
 
 exp = initialize_exp()
 device_setup = exp.create_device_setup(modulation_type='software')

@@ -18,7 +18,7 @@ from helper.pulses import *
 from qubit_parameters import qubit_parameters, update_qp
 
 # %% parameters
-qubit = "q5"
+qubit = "q3"
 
 mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
@@ -41,12 +41,12 @@ signal_map_default = exp.signal_map_default(qubit)
 
 # %% 
 session = Session(device_setup=device_setup, )
-session.connect(do_emulation=False, reset_devices=True)
+session.connect(do_emulation=False)
 
 # %% amplitude sweep
 simulate = False
 
-steps = 100
+steps = 300
 # number of pi pulses
 pis = 4
 
@@ -76,7 +76,7 @@ def amplitude_rabi(amplitude_sweep):
                               amplitude=amplitude_sweep
                               )
 
-            with exp_rabi.section(uid="readout_section", play_after="qubit_excitation"):
+            with exp_rabi.section(uid="readout_section", play_after="qubit_excitation",trigger={"measure": {"state": True}}):
                 exp_rabi.play(signal="measure",
                               pulse=readout_pulse(qubit),
                               phase=qubit_parameters[qubit]['angle'])
@@ -97,7 +97,7 @@ exp_rabi.set_signal_map(signal_map_default)
 
 # %%
 compiled_rabi = session.compile(exp_rabi)
-
+compiled_rabi.save('compiled_rabi_NOT_QASM.json')
 if simulate:
     plot_simulation(compiled_rabi, start_time=0, length=15e-6)
 
