@@ -43,12 +43,12 @@ n_lorenz = Fraction(1, 2)
 p = 0.0001
 
 center = qubit_parameters[qubit]["qb_freq"]
-freq_span = 30e6
-freq_steps = 30
-length = 20e-6
+freq_span = 3e6
+freq_steps = 100
+length = 30e-6
 max_amp = 1
-amp_steps = 10
-half_pulse = False
+amp_steps = 20
+half_pulse = True
 rotate_iq = True
 
 dfs = np.linspace(start=center - freq_span / 2, stop=center + freq_span / 2, num=freq_steps)  # for carrier calculation
@@ -82,7 +82,7 @@ def power_broadening():
                             pulse_type=p_type,
                             p=p,
                             n=n_lorenz,
-                            half_pulse = half_pulse
+                            half_pulse=half_pulse
 
                         ),
                         amplitude=amplitude_sweep
@@ -147,14 +147,15 @@ plt.show()
 
 # %% save_to_labber
 measured_data = {}
-measured_data['amplitude'] = amplitude
+measured_data['amplitude'] = amplitude.T
 
-sweep_parameters = dict(amplitude=dfs - qubit_parameters[qubit]["qb_freq"],
-                        detuning=dAs * max_amp)
-units = dict(amplitude="a.u", detuning="Hz")
+sweep_parameters = dict(detuning=dAs * max_amp,
+                        amplitude=dfs - qubit_parameters[qubit]["qb_freq"])
+units = dict(detuning="Hz", amplitude="Hz")
 
 meta_data = dict(tags=["Nadav-Lab", "Power Broadening"],
                  user="Asaf",
+                 half_pulse=half_pulse,
                  qubit=qubit,
                  qubit_parameters=qubit_parameters)
 

@@ -3,6 +3,8 @@ from laboneq.dsl.experiment import pulse_library
 
 from qubit_parameters import qubit_parameters
 
+CAN_COMPRESS = True
+
 
 @pulse_library.register_pulse_functional
 def lorentzian(x, p, n, **_):
@@ -49,11 +51,22 @@ def power_broadening_pulse(
     elif pulse_type == "Lorentzian":
         if not half_pulse:
             pulse = lorentzian(
-                uid=f"pi_pulse_{qubit}", length=length, amplitude=amplitude, p=p, n=n
+                uid=f"pi_pulse_{qubit}",
+                length=length,
+                amplitude=amplitude,
+                p=p,
+                n=n,
+                can_compress=CAN_COMPRESS
             )
         else:
             pulse = lorentzian_half(
-                uid=f"pi_pulse_{qubit}", length=length, amplitude=amplitude, p=p, n=n
+                uid=f"pi_pulse_{qubit}",
+                length=length,
+                amplitude=amplitude,
+                p=p,
+                n=n,
+                can_compress=CAN_COMPRESS
+
             )
     else:
         raise ValueError("pulse_type must be Square, Gaussian or Lorentzian")

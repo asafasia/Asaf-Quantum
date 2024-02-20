@@ -1,102 +1,78 @@
 from laboneq.simple import *
-# from laboneq.dsl.experiment.pulse_library import register_pulse_functional
 import numpy as np
-
 from qubit_parameters import *
 
+CAN_COMPRESS = True
 
 @pulse_library.register_pulse_functional
-def lorentizan(
-    x, p,n,**_
-):
-    
-    a = np.sqrt((1/p)**(1/n) - 1)
-    
-    
-    lorentizan = 1/(1+(a*x)**2)**n
- 
-    
-    return lorentizan
-
-
-@pulse_library.register_pulse_functional
-def k_pulse(x,**_):
-    return np.heaviside(x-0.5,0.5)*0
+def k_pulse(x, **_):
+    return np.heaviside(x - 0.5, 0.5) * 0
     # return np.ones_like(x)
 
 
-
-
 def pi_pulse(qubit):
-    
     pi_pulse = pulse_library.const(
         uid=f"pi_pulse_{qubit}",
         length=qubit_parameters[qubit]["pi_len"],
         amplitude=qubit_parameters[qubit]["pi_amp"],
-        can_compress=True
-        )
-    
+        can_compress=CAN_COMPRESS
+    )
+
     return pi_pulse
 
 
-def many_pi_pulse(qubit,pis): 
+def many_pi_pulse(qubit, pis):
     many_pi_pulse = pulse_library.const(
         uid=f"pi_pulse_{qubit}",
         length=qubit_parameters[qubit]["pi_len"],
-        amplitude=qubit_parameters[qubit]["pi_amp"]*pis
-        )
-   
+        amplitude=qubit_parameters[qubit]["pi_amp"] * pis
+    )
 
     return many_pi_pulse
 
 
 def power_broadening_pulse(qubit,
-                           amplitude = None,
-                           length = None,
-                           pulse_type = 'Square',
+                           amplitude=None,
+                           length=None,
+                           pulse_type='Square',
                            p=50,
-                           n=2/3,
-                           
+                           n=2 / 3,
+
                            ):
-    
-    
     if not amplitude:
         amplitude = qubit_parameters[qubit]["pi_amp"]
-    
+
     if not length:
         length = qubit_parameters[qubit]["pi_len"]
 
-    
-    
     if pulse_type == 'Square':
-    
+
         pulse = pulse_library.const(
             uid=f"pi_pulse_{qubit}",
             length=length,
             amplitude=amplitude
-            )
-        
+        )
+
     elif pulse_type == 'Gaussian':
         pulse = pulse_library.gaussian(
             uid=f"pi_pulse_{qubit}",
-            sigma = np.sqrt(-np.ln(t)/2),
+            sigma=np.sqrt(-np.ln(t) / 2),
             length=length,
             amplitude=amplitude
-            )
-            
+        )
+
     elif pulse_type == 'Lorentzian':
         pulse = lorentizan(
             uid=f"pi_pulse_{qubit}",
             length=length,
             amplitude=amplitude,
-            p = p,
-            n = n
-            )
+            p=p,
+            n=n
+        )
     else:
         print("Enetred worng pulse")
-        
-    return pulse
 
+    return pulse
 
 
 def kernel_pulse(qubit):
@@ -104,10 +80,9 @@ def kernel_pulse(qubit):
         uid=f"kernel_pulse_{qubit}",
         length=qubit_parameters[qubit]["res_len"],
         amplitude=qubit_parameters[qubit]["res_amp"]
-        )
-    
+    )
+
     return kernel_pulse
-    
 
 
 def spec_pulse(qubit):
@@ -115,17 +90,18 @@ def spec_pulse(qubit):
         uid=f"spec_pulse_{qubit}",
         length=qubit_parameters[qubit]["drive_len"],
         amplitude=qubit_parameters[qubit]["drive_amp"]
-        )
-    
+    )
+
     return spec_pulse
-    
+
+
 def readout_pulse(qubit):
     readout_pulse = pulse_library.const(
-        uid = f"readout_pulse_{qubit}",
-        length = qubit_parameters[qubit]["res_len"],
-        amplitude = qubit_parameters[qubit]["res_amp"]
-        )
-    
+        uid=f"readout_pulse_{qubit}",
+        length=qubit_parameters[qubit]["res_len"],
+        amplitude=qubit_parameters[qubit]["res_amp"]
+    )
+
     # readout_pulse = pulse_library.gaussian(
     #     uid = f"readout_pulse_{qubit}",
     #     length = qubit_parameters[qubit]["res_len"],
@@ -135,6 +111,7 @@ def readout_pulse(qubit):
     #     )
     return readout_pulse
 
+
 def flux_pulse(qubit):
     flux_pulse = pulse_library.const(
         uid=f"flux_pulse_{qubit}",
@@ -142,9 +119,8 @@ def flux_pulse(qubit):
         amplitude=1,
         can_compress=True
 
-        
-        )
-    
+    )
+
     # flux_pulse = pulse_library.gaussian(
     #     uid = f"flux_pulse_{qubit}",
     #     length = 120e-6,
@@ -152,9 +128,7 @@ def flux_pulse(qubit):
     #     sigma = 1/3,
     #     order = 30,
     #     width = width
-        
 
-        
     #     )
-    
+
     return flux_pulse
