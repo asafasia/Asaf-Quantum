@@ -178,7 +178,8 @@ class QuantumProcessor:
                 ),
             )
 
-            qubit_map[f'q[{i}]'] = qubit_obj
+            qubit_map[f'qr[{i}]'] = qubit_obj
+            # qubit_map[]
         self.qubit_map = qubit_map
 
         coupler_map = {}

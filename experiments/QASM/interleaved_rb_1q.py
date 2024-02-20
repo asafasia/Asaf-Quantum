@@ -16,8 +16,8 @@ a = QuantumProcessor(mode=mode, qubits=[qubit])
 interleaved_element = QuantumCircuit(1)
 interleaved_element.x(0)
 
-num_samples = 5
-lengths = np.arange(1, 300, 10)
+num_samples = 10
+lengths = np.arange(1, 250, 5)
 
 rb1_qiskit_circuits = randomized_benchmarking.InterleavedRB(
     interleaved_element,
@@ -75,14 +75,14 @@ rc = 0.5 * (1 - p)
 rc_interleaved = 0.5 * (1 - p_interleaved / p)
 print(f' p = {p}')
 print(f' p_interleaved = {p_interleaved}')
-print(f' rc = {rc:2e}', )
-print(f' rc_interleaved = {rc_interleaved:2e}', )
+print(f' rc = {rc:.2e}', )
+print(f' rc_interleaved = {rc_interleaved:.2e}', )
 plt.xlabel('lengths')
 plt.ylabel('probability')
-plt.title('Interleaved Randomized benchmarking: X Gate')
-plt.plot(lengths, standard_probabilities, 'o', color='blue', label=f'r_clifford =  {rc:2e}  ')
+plt.title('Interleaved Randomized Benchmarking: X Gate')
+plt.plot(lengths, standard_probabilities, 'o', color='blue', label=f'clifford error =  {rc:.2e}  ')
 plt.plot(lengths, f(lengths, *args), color='blue')
-plt.plot(lengths, interleaved_probabilities, 'o', color='green', label=f'r_x = {rc_interleaved:2e}')
+plt.plot(lengths, interleaved_probabilities, 'o', color='green', label=f'x gate error = {rc_interleaved:.2e}')
 plt.plot(lengths, f(lengths, *args_interleaved), color='green')
 plt.legend()
 plt.show()
