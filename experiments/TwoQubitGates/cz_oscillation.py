@@ -4,11 +4,10 @@ from helper.exp_helper import *
 from helper.pulses import *
 from helper.kernels import kernels
 from qubit_parameters import qubit_parameters
-import json
 from scipy.optimize import curve_fit
 
 # %% devise setup
-coupler = 'c23'
+coupler = 'c13'
 
 if coupler == 'c13':
     qubit_m = "q1"
@@ -62,6 +61,7 @@ time_step_num = 20
 time_sweep = LinearSweepParameter(
     "freq_sweep", 0, max_time, time_step_num)
 
+
 # %%
 def qubit_spectroscopy(time_sweep):
     # Create qubit spectroscopy Experiment - uses qubit drive, readout drive and data acquisition lines
@@ -93,8 +93,8 @@ def qubit_spectroscopy(time_sweep):
                 exp_qspec.play(
                     signal=f"flux_{coupler}",
                     pulse=flux_pulse(coupler),
-                    amplitude=0.01,
-                    length=100e-9)
+                    length=100e-9,
+                    amplitude=-1)
 
             with exp_qspec.section(uid="time_delay", play_after="flux_section"):
                 exp_qspec.play(signal=f"drive_{qubit_s}", pulse=pi_pulse(qubit_s), amplitude=1 / 2,
@@ -113,8 +113,7 @@ def qubit_spectroscopy(time_sweep):
             with exp_qspec.section(uid="delay"):
                 # relax time after readout - for qubit relaxation to groundstate and signal processing
                 exp_qspec.delay(signal="measure", time=1e-6)
-    return exp_qspec
-
+        return exp_qspec
 
 # %% Run Exp
 exp_qspec = qubit_spectroscopy(time_sweep)
@@ -123,34 +122,19 @@ exp_qspec.set_signal_map(signal_map_default)
 compiled_qspec = session.compile(exp_qspec)
 
 if simulate:
-    plot_simulation(compiled_qspec, start_time=0, length=3e-6,signals = [f'flux_{coupler}', f'drive_{qubit_s}', f'measure'])
-
+    plot_simulation(compiled_qspec, start_time=0, length=1e-6, signals=[f'flux_{coupler}', f'drive_{qubit_s}'])
+plt.show()
 # %% run the compiled experiemnt
 qspec_results = session.run(exp_qspec)
 acquire_results = qspec_results.get_data("qubit_spec")
-
-if plot_from_json:
-
-    file_path = r'C:\Users\stud\Documents\GitHub\qhipu-files\LabOne Q\Exp_results\2023-12-20_results\qubit_spectroscopy_q1_13-20-35.json'
-    with open(file_path, 'r') as json_file:
-        data = json.load(json_file)
-
-    amplitude = data["plot_vectors"]["amplitude"]
-    time_sweep = data["plot_vectors"]["time_sweep"]
-
-
-else:
-    amplitude = np.abs(acquire_results)
+amplitude = np.abs(acquire_results)
 
 # %%
 
-# amplitude = correct_axis(amplitude,qubit_parameters[qubit_s]["ge"])
 plt.plot(time_sweep, amplitude)
-
 
 def cos_wave(x, amplitude, T, offset):
     return amplitude * np.cos(2 * np.pi / T * x) + offset
-
 
 # Assuming your signal is e^(i * theta)
 # phase_guess = np.angle(np.mean(amplitude))  # Initial guess for the angle
@@ -173,4 +157,4 @@ plt.title(f'Phase Oscillations {qubit_s}', fontsize=18)
 plt.xlabel('time [us]')
 plt.ylabel('amp [us]')
 plt.title(f'Cz Oscillations vs. Coupler Flux {qubit_s} {coupler}', fontsize=18)
-plt.show()
+# plt.show()

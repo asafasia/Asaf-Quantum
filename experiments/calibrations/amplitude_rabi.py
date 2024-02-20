@@ -10,7 +10,7 @@ from helper.pulses import *
 from qubit_parameters import qubit_parameters, update_qp
 
 # %% parameters
-qubit = "q2"
+qubit = "q3"
 
 mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
@@ -35,7 +35,7 @@ session.connect(do_emulation=False)
 
 # %% amplitude sweep
 simulate = False
-steps = 300
+steps = 100
 pis = 4
 n_avg = 1000
 plot_from_json = False

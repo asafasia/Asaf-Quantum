@@ -3,7 +3,7 @@ from qiskit import QuantumCircuit, qasm3
 
 from helper.qasm_helper import QuantumProcessor
 
-qubits = ['q3', 'q5']
+qubits = ['q1', 'q3']
 mode = 'disc'
 a = QuantumProcessor(mode=mode, qubits=qubits)
 
@@ -12,7 +12,7 @@ n = 100
 for i in range(n):
     circuit = QuantumCircuit(len(qubits))
     for _ in range(i):
-        circuit.rz(0, 1)
+        circuit.cz(0, 1)
     qasm_circs.append(qasm3.dumps(circuit))
 
 a.add_experiment(qasm_circs)

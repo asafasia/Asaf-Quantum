@@ -8,7 +8,7 @@ from qubit_parameters import qubit_parameters
 from helper.kernels import kernels
 
 # %% devise setup
-coupler = 'c23'
+coupler = 'c13'
 
 if coupler == 'c13':
     qubit_m = "q1"
@@ -55,16 +55,16 @@ central_frequency = qubit_parameters[qubit_s]["qb_freq"]
 simulate = False
 
 # %%parameters for sweeping
-exp_repetitions = 200
+exp_repetitions = 500
 
 # parameters for flux sweep:
-min_flux = 30e-3  # [V]
-max_flux = -50e-3  # [V]
-flux_step_num = 22
+min_flux = -1  # [V]
+max_flux = 1 # [V]
+flux_step_num = 50
 
 # parameters for pulse length sweep:
-min_time = 0  # [sec]
-max_time = 0.3e-6  # [sec]
+min_time = 100e-9  # [sec]
+max_time = 1e-6  # [sec]
 time_step_num = 20
 
 # %% parameters for experiment
@@ -99,13 +99,13 @@ def qubit_spectroscopy(flux_sweep, time_sweep):
                     exp_qspec.play(signal=f"drive_{qubit_m}", pulse=pulses.pi_pulse(qubit_m))
                     exp_qspec.play(signal=f"drive_{qubit_s}", pulse=pulses.pi_pulse(qubit_s))
 
-                with exp_qspec.section(uid="time_delay", play_after="qubit_excitation"):
+                with exp_qspec.section(uid="flux_delay", play_after="qubit_excitation"):
                     exp_qspec.play(signal=f"flux_{coupler}",
                                    pulse=pulses.flux_pulse(coupler),
                                    length=time_sweep,
                                    amplitude=flux_sweep)
 
-                with exp_qspec.section(uid="readout_section", play_after="time_delay"):
+                with exp_qspec.section(uid="readout_section", play_after="flux_delay"):
                     exp_qspec.play(signal="measure", pulse=pulses.readout_pulse(qubit_s))
 
                     exp_qspec.acquire(
@@ -148,8 +148,8 @@ amplitude = np.abs(acquire_results)
 # %% plot 2d
 
 amplitude = amplitude.T
-
-x, y = np.meshgrid(flux_sweep.values, time_sweep.values)
+max_flux = qubit_parameters[coupler]["max_flux"]
+x, y = np.meshgrid(flux_sweep.values*max_flux, time_sweep.values)
 
 plt.xlabel('Flux [mV]')
 plt.ylabel('time [us]')
@@ -181,7 +181,7 @@ normalized = Fsignal / Fsignal.max()
 gamma = 1 / 4
 corrected = np.power(normalized, gamma)  # try values between 0.5 and 2 as a start point
 
-fig_fft = plt.pcolormesh(bias_level * 1e3, abs(bias_freq) * 1e-6, corrected, cmap='coolwarm')
+fig_fft = plt.pcolormesh(bias_level*max_flux * 1e3, abs(bias_freq) * 1e-6, corrected, cmap='coolwarm')
 plt.title(f'FFT Qubit Spectroscopy vs. Coupler Flux  Coupler {coupler}', fontsize=18)
 
 plt.xlabel('coupler bias [mV]')

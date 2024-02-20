@@ -219,29 +219,28 @@ class QubitSpectroscopy:
 
 if __name__ == '__main__':
 
+
+    # %%
     args = {
         'qubit': 'q3',
         'n_avg': 400,
         'simulate': False,
-        'amp': 1 / 50,
-        'span': 10e6,
+        'amp': 1 / 20,
+        'span': 100e6,
         'steps': 201,
         'w0': True,
         'center_axis': True,
         'ground_max': False,
         'p': 0.7,
         'update_flux': True,
-        'mode': 'spec'
+        'mode': 'disc'
     }
-
+    # %%
     qs = QubitSpectroscopy(**args)
-    n = 7
+    n = 10
 
     for i in range(n):
         print('number: ', i)
         qs.run_exp()
         qs.update()
-        print('############## center = ', qs.center * 1e-6, 'MHz ##################')
 
-    anharmonicity = (qubit_parameters['q3']['qb_freq'] - qubit_parameters['q3']['w125']) * 2
-    print('anharmonicity = ', anharmonicity * 1e-6, 'MHz')

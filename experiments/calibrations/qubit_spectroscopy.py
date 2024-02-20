@@ -18,7 +18,7 @@ import scipy.optimize as opt
 
 
 # %% parameters
-qubit = "q5"
+qubit = "q3"
 
 mode = 'spec'
 modulation_type = 'hardware' if mode == 'spec' else 'software'

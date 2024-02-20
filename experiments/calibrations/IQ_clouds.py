@@ -35,9 +35,9 @@ from pulses import *
 from qubit_parameters import qubit_parameters, update_qp
 
 # %% devise setup
-qubit = "q3"
+qubit = "q1"
 
-mode = 'int'
+mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY
@@ -60,7 +60,7 @@ signal_map_default = exp.signal_map_default(qubit)
 do_emulation = False
 simulate = True
 show_clouds = True
-exp_repetitions = 5000
+exp_repetitions = 20000
 plot_from_json = False
 
 # %%

@@ -3,12 +3,12 @@ from matplotlib import pyplot as plt
 from qiskit import QuantumCircuit, qasm3, transpile
 from qiskit_experiments.library import randomized_benchmarking
 from scipy.optimize import curve_fit
-from qubit_parameters import qubit_parameters, update_qp
+from qubit_parameters import qubit_parameters
 
 from helper.qasm_helper import QuantumProcessor
 
 mode = 'disc'
-qubit = 'q2'
+qubit = 'q1'
 a = QuantumProcessor(mode=mode, qubits=[qubit])
 
 # %% create qasm circuits
@@ -71,11 +71,13 @@ save_labber = True
 if save_labber:
     import labber.labber_util as lu
 
-    measured_data = dict(population=np.array(results))
+    measured_data = dict(population=np.array(probabilities))
     sweep_parameters = dict(lengths=np.array(lengths))
     units = dict()
-    meta_data = dict(user="Guy", tags=[qubit,'rb'], qubit_parameters=qubit_parameters)
-    exp_result = dict(measured_data=measured_data, sweep_parameters=sweep_parameters, units=units,
+    meta_data = dict(user="Asaf", tags=[qubit,'rb'], qubit_parameters=qubit_parameters)
+    exp_result = dict(measured_data=measured_data,
+                      sweep_parameters=sweep_parameters,
+                      units=units,
                       meta_data=meta_data)
 
     lu.create_logfile("1q randomized benchmarking", **exp_result, loop_type="1d")

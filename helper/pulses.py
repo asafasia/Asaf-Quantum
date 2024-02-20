@@ -52,13 +52,10 @@ def readout_pulse(qubit):
     )
 
 
-def flux_pulse(qubit, amplitude=None,width=100e-6):
-    if amplitude:
-        amp = amplitude
-    else:
-        amp = qubit_parameters[qubit]["flux_bias"]
+def flux_pulse(qubit, length=120e-6, width=100e-6):
+    amp = qubit_parameters[qubit]["max_flux"]
 
-    return pulse_library.const(
+    return pulse_library.gaussian(
         uid=f"flux_pulse_{qubit}",
         length=120e-6,
         amplitude=amp,
@@ -66,8 +63,8 @@ def flux_pulse(qubit, amplitude=None,width=100e-6):
     )
     # return pulse_library.gaussian_square(
     #     uid=f"flux_pulse_{qubit}",
-    #     length=100e-9,
+    #     length=30e-9,
     #     amplitude=amp,
-    #     sigma=20e-9,
-    #     width=80e-9,
+    #     sigma=1 / 20,
+    #     width=20e-9,
     # )
