@@ -1,61 +1,32 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 11 12:45:13 2024
-
-@author: stud
-"""
-
-# %% Imports
-
-# LabOne Q:
-from laboneq.simple import *
-# Helpers:
-from laboneq.contrib.example_helpers.plotting.plot_helpers import (
-    plot_results,
-    plot_simulation,
-)
-from laboneq.contrib.example_helpers.generate_example_datastore import (
-    generate_example_datastore,
-    get_first_named_entry,
-)
-from pathlib import Path
-import time
-import numpy as np
-
+from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
 import matplotlib.pyplot as plt
-import math
-
 from helper.exp_helper import *
 from helper.pulses import *
-from qubit_parameters import qubit_parameters, update_qp
 from helper.kernels import kernels
-
 from qubit_parameters import qubit_parameters
-
 import json
-from datetime import datetime
-import os
-
 from scipy.optimize import curve_fit
 
 # %% devise setup
-
-
-coupler = 'c43'
+coupler = 'c23'
 
 if coupler == 'c13':
     qubit_m = "q1"
     qubit_s = "q3"
-    n_port = 5
+    n_port = 0
 
 elif coupler == 'c23':
     qubit_m = "q3"
     qubit_s = "q2"
-    n_port = 6
+    n_port = 1
 elif coupler == 'c43':
     qubit_s = "q3"
     qubit_m = "q4"
-    n_port = 7
+    n_port = 2
+elif coupler == 'c53':
+    qubit_s = "q3"
+    qubit_m = "q5"
+    n_port = 3
 
 mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
@@ -74,31 +45,22 @@ exp_signals = exp.signals(qubit_s)
 signal_map_default = exp.signal_map_default(qubit_s)
 # %%
 session = Session(device_setup=device_setup)
-session.connect(do_emulation=False)
+session.connect(do_emulation=True)
 
 # %% parameters for user
-
-# central frequency for drive frequency sweep:
 central_frequency = qubit_parameters[qubit_s]["qb_freq"]
-
 # True for pulse simulation plots
-simulate = False
+simulate = True
 plot_from_json = False
 # %%parameters for sweeping
-
-num_averages = 1000
-
-flux = -0.2
-
+num_averages = 100
+flux = -0.02
 max_time = 0.5e-6  # [sec]
-time_step_num = 200
+time_step_num = 20
 
 # %% parameters for experiment
-
-
 time_sweep = LinearSweepParameter(
     "freq_sweep", 0, max_time, time_step_num)
-
 
 # %%
 def qubit_spectroscopy(time_sweep):
@@ -131,8 +93,8 @@ def qubit_spectroscopy(time_sweep):
                 exp_qspec.play(
                     signal=f"flux_{coupler}",
                     pulse=flux_pulse(coupler),
-                    amplitude=flux,
-                    length=time_sweep)
+                    amplitude=0.01,
+                    length=100e-9)
 
             with exp_qspec.section(uid="time_delay", play_after="flux_section"):
                 exp_qspec.play(signal=f"drive_{qubit_s}", pulse=pi_pulse(qubit_s), amplitude=1 / 2,
@@ -150,23 +112,18 @@ def qubit_spectroscopy(time_sweep):
             # delay between consecutive experiment
             with exp_qspec.section(uid="delay"):
                 # relax time after readout - for qubit relaxation to groundstate and signal processing
-                exp_qspec.delay(signal="measure", time=120e-6)
+                exp_qspec.delay(signal="measure", time=1e-6)
     return exp_qspec
 
 
 # %% Run Exp
-# define experiment with frequency sweep for qubit 0
 exp_qspec = qubit_spectroscopy(time_sweep)
-
-# apply calibration and signal map for qubit 0
 exp_qspec.set_signal_map(signal_map_default)
 # %% compile exp
-# compile the experiment on the open instrument session
-
+compiled_qspec = session.compile(exp_qspec)
 
 if simulate:
-    compiled_qspec = session.compile(exp_qspec)
-    plot_simulation(compiled_qspec, start_time=0, length=300e-6)
+    plot_simulation(compiled_qspec, start_time=0, length=3e-6,signals = [f'flux_{coupler}', f'drive_{qubit_s}', f'measure'])
 
 # %% run the compiled experiemnt
 qspec_results = session.run(exp_qspec)
@@ -187,64 +144,8 @@ else:
 
 # %%
 
-if not plot_from_json:
-
-    # plot vectors
-
-    plot_vectors = {
-        'amplitude': amplitude.tolist(),
-        'time_sweep': time_sweep.values.tolist(),
-    }
-
-    # Additional experiment parameters
-    experiment_parameters = {
-
-        'n_avg': num_averages,
-        'time_step_num': time_step_num,
-    }
-
-    # Add experiment parameters to the data dictionary
-
-    # New parameter: experiment string
-    experiment_string = """
-
-    return exp
-    """
-
-    data = {
-        'experiment_parameters': experiment_parameters,
-        'plot_vectors': plot_vectors,
-        'qubit_parameters': qubit_parameters,
-    }
-
-    data['experiment'] = experiment_string.strip()
-
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    # Create a folder based on the current date if it doesn't exist
-    folder_path = os.path.join("C:/Users/stud/Documents/GitHub/qhipu-files/LabOne Q/Exp_results",
-                               f"{current_date}_results")
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-
-    # Generate a unique filename based on the current time
-    current_time = datetime.now().strftime("%H-%M-%S")
-    filename = os.path.join(folder_path, f"Cz_oscillation_{qubit_s}_{current_time}.json")
-
-    with open(filename, 'w') as json_file:
-        json.dump(data, json_file)  # Adding indent for better readability
-
-    print(f"Data saved to {filename}")
-
-# %% plot slice
-
-
-save_func(session, "coupler_spec")
-
 # amplitude = correct_axis(amplitude,qubit_parameters[qubit_s]["ge"])
-if plot_from_json == False:
-    plt.plot(time_sweep, amplitude)
-else:
-    plt.plot(time_sweep.values, amplitude)
+plt.plot(time_sweep, amplitude)
 
 
 def cos_wave(x, amplitude, T, offset):
@@ -252,34 +153,24 @@ def cos_wave(x, amplitude, T, offset):
 
 
 # Assuming your signal is e^(i * theta)
-phase_guess = np.angle(np.mean(amplitude))  # Initial guess for the angle
+# phase_guess = np.angle(np.mean(amplitude))  # Initial guess for the angle
 
-guess = [(max(amplitude) - min(amplitude)) * 10, 1e-7, np.mean(amplitude)]
+# guess = [(max(amplitude) - min(amplitude)) * 10, 1e-7, np.mean(amplitude)]
 
-params, params_covariance = curve_fit(cos_wave, time_sweep, amplitude, p0=guess)
+# params, params_covariance = curve_fit(cos_wave, time_sweep, amplitude, p0=guess)
 
 # Plot the amplitude in the first subplot
-plt.plot(time_sweep, cos_wave(time_sweep, *params),
-         label='Fitted function', color='red')
+# plt.plot(time_sweep, cos_wave(time_sweep, *params),
+#          label='Fitted function', color='red')
 plt.xlabel('Drive Amplitude [a.u.]')
 plt.ylabel('Amplitude [a.u.]')
 plt.legend()
-# Set a single big title for the entire figure
 plt.title(f'Phase Oscillations {qubit_s}', fontsize=18)
-
-phase_shift = 2 * np.pi / params[1] * time_sweep
-phase_shift_parameter = params[1]
-print("phase_shift_helper =", params[1])
-
-# # Adjust layout and display the plot
-# text = f"Phase Shift: {phase_shift:.4f}"
-# plt.text(0.65, 0.2, text, transform=plt.gca().transAxes, fontsize=10, verticalalignment='center', bbox=dict(facecolor='white', alpha=0.8))
-
+# phase_shift = 2 * np.pi / params[1] * time_sweep
+# phase_shift_parameter = params[1]
+# print("phase_shift_helper =", params[1])
 
 plt.xlabel('time [us]')
 plt.ylabel('amp [us]')
-
 plt.title(f'Cz Oscillations vs. Coupler Flux {qubit_s} {coupler}', fontsize=18)
-
-plt.tight_layout()
 plt.show()

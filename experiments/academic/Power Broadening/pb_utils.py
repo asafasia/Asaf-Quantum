@@ -17,7 +17,7 @@ def lorentzian_half(x, p, n, **_):
     a = np.sqrt((1 / p) ** (1 / n) - 1)
     f = 1 / (1 + (a * x) ** 2) ** n
 
-    return f - 2 * np.heaviside(x, 1) * f
+    return f - 0*2 * np.heaviside(x, 1) * f
 
 
 def power_broadening_pulse(

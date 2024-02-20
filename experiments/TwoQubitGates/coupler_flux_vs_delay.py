@@ -30,7 +30,7 @@ elif coupler == 'c53':
 else:
     raise ValueError('Coupler not found')
 
-mode = 'spec'
+mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY
@@ -58,14 +58,14 @@ simulate = False
 exp_repetitions = 200
 
 # parameters for flux sweep:
-min_flux = 3e-3  # [V]
+min_flux = 30e-3  # [V]
 max_flux = -50e-3  # [V]
 flux_step_num = 22
 
 # parameters for pulse length sweep:
 min_time = 0  # [sec]
-max_time = 0.4e-6  # [sec]
-time_step_num = 10
+max_time = 0.3e-6  # [sec]
+time_step_num = 20
 
 # %% parameters for experiment
 
@@ -100,7 +100,10 @@ def qubit_spectroscopy(flux_sweep, time_sweep):
                     exp_qspec.play(signal=f"drive_{qubit_s}", pulse=pulses.pi_pulse(qubit_s))
 
                 with exp_qspec.section(uid="time_delay", play_after="qubit_excitation"):
-                    exp_qspec.play(signal=f"flux_{coupler}", pulse=pulses.flux_pulse(coupler), length=time_sweep)
+                    exp_qspec.play(signal=f"flux_{coupler}",
+                                   pulse=pulses.flux_pulse(coupler),
+                                   length=time_sweep,
+                                   amplitude=flux_sweep)
 
                 with exp_qspec.section(uid="readout_section", play_after="time_delay"):
                     exp_qspec.play(signal="measure", pulse=pulses.readout_pulse(qubit_s))

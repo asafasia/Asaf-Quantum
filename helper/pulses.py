@@ -52,7 +52,7 @@ def readout_pulse(qubit):
     )
 
 
-def flux_pulse(qubit, amplitude=None):
+def flux_pulse(qubit, amplitude=None,width=100e-6):
     if amplitude:
         amp = amplitude
     else:
@@ -64,3 +64,10 @@ def flux_pulse(qubit, amplitude=None):
         amplitude=amp,
 
     )
+    # return pulse_library.gaussian_square(
+    #     uid=f"flux_pulse_{qubit}",
+    #     length=100e-9,
+    #     amplitude=amp,
+    #     sigma=20e-9,
+    #     width=80e-9,
+    # )

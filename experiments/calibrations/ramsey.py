@@ -21,7 +21,7 @@ from pulses import *
 from qubit_parameters import *
 
 # %% parameters
-qubit = "q5"
+qubit = "q2"
 
 mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
@@ -52,7 +52,7 @@ exp_repetitions = 700
 
 w = 1e6
 sweep_start = 0
-sweep_stop = 40e-6
+sweep_stop = 20e-6
 step_num = 500
 
 sweep_time = LinearSweepParameter(uid="sweep", start=sweep_start, stop=sweep_stop, count=step_num)

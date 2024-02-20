@@ -39,18 +39,18 @@ p_type = 'Lorentzian'  # Square,Gaussian,Lorentzian
 
 exp_repetitions = 500
 
-n_lorenz = Fraction(1, 2)
-p = 0.0001
+n_lorenz = Fraction(1, 20)
+p = 0.001/4
 
 center = qubit_parameters[qubit]["qb_freq"]
-freq_span = 3e6
+freq_span = 2e6
 freq_steps = 100
-length = 30e-6
+length = 20e-6
 max_amp = 1
-amp_steps = 20
+amp_steps = 10
 half_pulse = True
 rotate_iq = True
-
+T2 = 2.55e-6
 dfs = np.linspace(start=center - freq_span / 2, stop=center + freq_span / 2, num=freq_steps)  # for carrier calculation
 dAs = np.linspace(start=0, stop=1, num=amp_steps)
 
@@ -138,6 +138,9 @@ if rotate_iq:
     amplitude = 1 - amplitude
 
 x, y = np.meshgrid(dfs - qubit_parameters[qubit]["qb_freq"], dAs * max_amp)
+plt.title('half_pulse = ' + str(half_pulse))
+plt.axvline(x=1/T2/1e6/2, color='r', linestyle='--')
+plt.axvline(x=-1/T2/1e6/2, color='r', linestyle='--')
 
 plt.pcolormesh(x * 1e-6, y / qubit_parameters[qubit]['pi_amp'], amplitude)
 plt.xlabel('Detuning [MHz]')
@@ -147,11 +150,11 @@ plt.show()
 
 # %% save_to_labber
 measured_data = {}
-measured_data['amplitude'] = amplitude.T
+measured_data['amplitude'] = amplitude
 
-sweep_parameters = dict(detuning=dAs * max_amp,
-                        amplitude=dfs - qubit_parameters[qubit]["qb_freq"])
-units = dict(detuning="Hz", amplitude="Hz")
+sweep_parameters = dict(detuning=dfs - qubit_parameters[qubit]["qb_freq"],
+                        amplitude=dAs * max_amp)
+units = dict(detuning="Hz", amplitude="")
 
 meta_data = dict(tags=["Nadav-Lab", "Power Broadening"],
                  user="Asaf",

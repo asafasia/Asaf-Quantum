@@ -10,7 +10,7 @@ from collections import OrderedDict
 
 # %% devise setup
 
-qubit = "q2"
+qubit = "q3"
 
 exp = initialize_exp()
 device_setup = exp.create_device_setup()
@@ -23,7 +23,7 @@ session = Session(device_setup=device_setup, )
 session.connect(do_emulation=False)
 
 # %% parameters
-long_pulse = True
+long_pulse = False
 simulate = False
 plot_from_json = False
 num_averages = 300

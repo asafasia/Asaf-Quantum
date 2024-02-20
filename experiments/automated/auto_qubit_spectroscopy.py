@@ -223,8 +223,8 @@ if __name__ == '__main__':
         'qubit': 'q3',
         'n_avg': 400,
         'simulate': False,
-        'amp': 1 / 5,
-        'span': 100e6,
+        'amp': 1 / 50,
+        'span': 10e6,
         'steps': 201,
         'w0': True,
         'center_axis': True,
@@ -242,3 +242,6 @@ if __name__ == '__main__':
         qs.run_exp()
         qs.update()
         print('############## center = ', qs.center * 1e-6, 'MHz ##################')
+
+    anharmonicity = (qubit_parameters['q3']['qb_freq'] - qubit_parameters['q3']['w125']) * 2
+    print('anharmonicity = ', anharmonicity * 1e-6, 'MHz')
