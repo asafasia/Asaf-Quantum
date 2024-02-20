@@ -220,11 +220,11 @@ class QubitSpectroscopy:
 if __name__ == '__main__':
 
     args = {
-        'qubit': 'q2',
+        'qubit': 'q3',
         'n_avg': 400,
         'simulate': False,
         'amp': 1 / 5,
-        'span': 170e6,
+        'span': 100e6,
         'steps': 201,
         'w0': True,
         'center_axis': True,

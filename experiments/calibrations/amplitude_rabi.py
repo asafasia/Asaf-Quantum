@@ -12,7 +12,7 @@ from qubit_parameters import qubit_parameters, update_qp
 # %% parameters
 qubit = "q2"
 
-mode = 'spec'
+mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY

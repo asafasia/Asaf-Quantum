@@ -7,9 +7,9 @@ from helper.pulses import *
 from qubit_parameters import *
 
 # %% parameters
-qubit = "q4"
+qubit = "q3"
 
-mode = 'spec'
+mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY
@@ -34,8 +34,8 @@ session.connect(do_emulation=False)
 simulate = False
 
 sweep_start = 0
-sweep_stop = 200e-6
-step_num = 201
+sweep_stop = 100e-6
+step_num = 101
 
 ts = np.linspace(0, sweep_stop, step_num)
 

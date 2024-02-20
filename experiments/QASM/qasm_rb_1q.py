@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 from helper.qasm_helper import QuantumProcessor
 
 mode = 'disc'
-a = QuantumProcessor(mode=mode, qubits=['q3'])
+a = QuantumProcessor(mode=mode, qubits=['q2'])
 
 # %% create qasm circuits
 

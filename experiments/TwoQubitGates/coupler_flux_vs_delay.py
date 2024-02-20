@@ -8,7 +8,7 @@ from qubit_parameters import qubit_parameters
 from helper.kernels import kernels
 
 # %% devise setup
-coupler = 'c43'
+coupler = 'c23'
 
 if coupler == 'c13':
     qubit_m = "q1"
@@ -30,7 +30,7 @@ elif coupler == 'c53':
 else:
     raise ValueError('Coupler not found')
 
-mode = 'disc'
+mode = 'spec'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY
@@ -58,8 +58,8 @@ simulate = False
 exp_repetitions = 200
 
 # parameters for flux sweep:
-min_flux = 30e-3  # [V]
-max_flux = -100e-3  # [V]
+min_flux = 3e-3  # [V]
+max_flux = -50e-3  # [V]
 flux_step_num = 22
 
 # parameters for pulse length sweep:
@@ -100,7 +100,7 @@ def qubit_spectroscopy(flux_sweep, time_sweep):
                     exp_qspec.play(signal=f"drive_{qubit_s}", pulse=pulses.pi_pulse(qubit_s))
 
                 with exp_qspec.section(uid="time_delay", play_after="qubit_excitation"):
-                    exp_qspec.delay(signal="measure", time=time_sweep)
+                    exp_qspec.play(signal=f"flux_{coupler}", pulse=pulses.flux_pulse(coupler), length=time_sweep)
 
                 with exp_qspec.section(uid="readout_section", play_after="time_delay"):
                     exp_qspec.play(signal="measure", pulse=pulses.readout_pulse(qubit_s))
@@ -129,7 +129,7 @@ qspec_results = session.run(exp_qspec)
 
 # %%
 acquire_results = qspec_results.get_data("qubit_spec")
-amplitude = np.real(acquire_results)
+amplitude = np.abs(acquire_results)
 
 # %%
 # index = 0
@@ -178,7 +178,6 @@ normalized = Fsignal / Fsignal.max()
 gamma = 1 / 4
 corrected = np.power(normalized, gamma)  # try values between 0.5 and 2 as a start point
 
-# plt.axvline(x=565, color='green', linestyle='--')
 fig_fft = plt.pcolormesh(bias_level * 1e3, abs(bias_freq) * 1e-6, corrected, cmap='coolwarm')
 plt.title(f'FFT Qubit Spectroscopy vs. Coupler Flux  Coupler {coupler}', fontsize=18)
 

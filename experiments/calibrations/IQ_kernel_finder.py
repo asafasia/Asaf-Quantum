@@ -6,7 +6,7 @@ from qubit_parameters import *
 from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
 
 # %% devise setup
-qubit = "q4"
+qubit = "q3"
 
 exp = initialize_exp()
 device_setup = exp.create_device_setup(modulation_type='software')
