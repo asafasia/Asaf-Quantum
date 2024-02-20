@@ -18,7 +18,7 @@ import scipy.optimize as opt
 
 
 # %% parameters
-qubit = "q2"
+qubit = "q5"
 
 mode = 'spec'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
@@ -49,7 +49,7 @@ update_flux = False
 simulate = False
 n_avg = 300
 amp = 1 / 5  # ~0.4 (q3) for 2nd E level, 1/100 for 1st E level
-w0 = False
+w0 = True
 plot_from_json = False
 center_axis = True
 ground_max = False
@@ -60,7 +60,7 @@ if w0:
 else:
     center = qubit_parameters[qubit]["w125"]
 
-span = 300e6
+span = 100e6
 steps = 201
 
 drive_LO = qubit_parameters[qubit]["qb_lo"]

@@ -35,7 +35,7 @@ from pulses import *
 from qubit_parameters import qubit_parameters, update_qp
 
 # %% devise setup
-qubit = "q3"
+qubit = "q2"
 
 mode = 'int'
 modulation_type = 'hardware' if mode == 'spec' else 'software'

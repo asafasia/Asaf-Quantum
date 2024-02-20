@@ -6,20 +6,6 @@ CAN_COMPRESS = True
 
 
 @pulse_library.register_pulse_functional
-def lorentizan(x, p, n, **_):
-    a = np.sqrt((1 / p) ** (1 / n) - 1)
-    return 1 / (1 + (a * x) ** 2) ** n
-
-
-@pulse_library.register_pulse_functional
-def lorentzian_half(x, p, n, **_):
-    a = np.sqrt((1 / p) ** (1 / n) - 1)
-    f = 1 / (1 + (a * x) ** 2) ** n
-
-    return f - 2 * np.heaviside(x, 1) * f
-
-
-@pulse_library.register_pulse_functional
 def k_pulse(x, **_):
     return np.heaviside(x - 0.5, 0.5) * 0
 
@@ -39,43 +25,6 @@ def many_pi_pulse(qubit, pis: int):
         length=qubit_parameters[qubit]["pi_len"],
         amplitude=qubit_parameters[qubit]["pi_amp"] * pis,
     )
-
-
-def power_broadening_pulse(
-        qubit,
-        amplitude=None,
-        length=None,
-        pulse_type="Square",
-        p=1 / 10,
-        n=2 / 3,
-):
-    if not amplitude:
-        amplitude = qubit_parameters[qubit]["pi_amp"]
-
-    if not length:
-        length = qubit_parameters[qubit]["pi_len"]
-
-    if pulse_type == "Square":
-        pulse = pulse_library.const(
-            uid=f"pi_pulse_{qubit}", length=length, amplitude=amplitude
-        )
-
-    elif pulse_type == "Gaussian":
-        pulse = pulse_library.gaussian(
-            uid=f"pi_pulse_{qubit}",
-            sigma=np.sqrt(-np.log(p) / 2),
-            length=length,
-            amplitude=amplitude,
-        )
-
-    elif pulse_type == "Lorentzian":
-        pulse = lorentizan(
-            uid=f"pi_pulse_{qubit}", length=length, amplitude=amplitude, p=p, n=n
-        )
-    else:
-        raise ValueError("pulse_type must be Square, Gaussian or Lorentzian")
-
-    return pulse
 
 
 def kernel_pulse(qubit):
