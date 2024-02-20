@@ -12,6 +12,14 @@ def lorentizan(x, p, n, **_):
 
 
 @pulse_library.register_pulse_functional
+def lorentzian_half(x, p, n, **_):
+    a = np.sqrt((1 / p) ** (1 / n) - 1)
+    f = 1 / (1 + (a * x) ** 2) ** n
+
+    return f - 2 * np.heaviside(x, 1) * f
+
+
+@pulse_library.register_pulse_functional
 def k_pulse(x, **_):
     return np.heaviside(x - 0.5, 0.5) * 0
 
