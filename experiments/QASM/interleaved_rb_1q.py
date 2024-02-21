@@ -9,7 +9,7 @@ from helper.qasm_helper import QuantumProcessor
 
 mode = 'disc'
 qubit = 'q1'
-a = QuantumProcessor(mode=mode, qubits=[qubit])
+a = QuantumProcessor(mode=mode, qubits=[qubit], pipeline_chunk_count=10)
 
 # %% create qasm circuits
 
@@ -41,7 +41,7 @@ for circuit in rb1_transpiled_circuits:
 
 # %% add to processor and run
 
-a.add_experiment(rb1_program_list)
+a.add_experiment(rb1_program_list, )
 
 results = a.run_experiment()
 

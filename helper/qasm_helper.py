@@ -117,7 +117,6 @@ def cz(control: Qubit, target: Qubit, coupler: Qubit):
             pulse=pulses.pi_pulse(control.uid),
         )
 
-
         phase_shift_cancel_section.play(
             signal=target.signals["drive"],
             pulse=None,
@@ -131,10 +130,10 @@ def cz(control: Qubit, target: Qubit, coupler: Qubit):
 
 
 class QuantumProcessor:
-    def __init__(self, mode, qubits):
+    def __init__(self, mode, qubits, pipeline_chunk_count=2):
         self.coupler_map = None
         self.gubit_map = {}
-
+        self.pipeline_chunk_count = pipeline_chunk_count
         self.results = None
         self.compiled_experiment = None
         self.mode = mode
@@ -178,7 +177,7 @@ class QuantumProcessor:
                 ),
             )
 
-            qubit_map[f'qr[{i}]'] = qubit_obj
+            qubit_map[f'q[{i}]'] = qubit_obj
             # qubit_map[]
         self.qubit_map = qubit_map
 
@@ -232,7 +231,7 @@ class QuantumProcessor:
             batch_execution_mode="pipeline",
             do_reset=False,
             count=1000,
-            pipeline_chunk_count=4,
+            pipeline_chunk_count=self.pipeline_chunk_count,
             acquisition_type=self.acquisition_type,
         )
 

@@ -10,9 +10,9 @@ from helper.pulses import *
 from qubit_parameters import qubit_parameters
 
 # %% devise setup
-qubit = "q5"
+qubit = "q1"
 
-mode = 'int'
+mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
 if mode == 'spec':
     acquisition_type = AcquisitionType.SPECTROSCOPY
@@ -35,7 +35,7 @@ session.connect(do_emulation=False)
 
 # %% Experiment Parameters
 simulate = False
-points = 15
+points = 150
 exp_repetitions = 1000
 
 
@@ -58,14 +58,14 @@ def x_gate_rep():
             with exp_rabi.section(alignment=SectionAlignment.RIGHT):
                 for i in range(i):
                     exp_rabi.play(signal=f"drive_{qubit}",
-                                  pulse=pi_pulse(qubit), amplitude=1 / 2, )
+                                  pulse=pi_pulse(qubit), amplitude=1/2)
 
             with exp_rabi.section():
                 exp_rabi.reserve(f"drive_{qubit}")
 
                 exp_rabi.play(signal="measure",
                               pulse=readout_pulse(qubit),
-                              phase=0
+                              phase=qubit_parameters[qubit]['angle']
                               )
 
                 exp_rabi.acquire(
@@ -115,11 +115,9 @@ x_half = x[1:-1:2]
 x_for_fit = x[1:-1:4]
 
 plt.title(f'X Gate Repetitions Experimnet {qubit}')
-plt.title('NOT QASM, X gate, PHASE = pi/2')
 # plt.axhline(y=0.5,color = 'black')
-# plt.plot(range(points), amplitude, '.')
-plt.plot(range(points), amplitude, label='Real')
-plt.plot(range(points), amplitude_I, label='Imag')
+plt.plot(range(points), amplitude, '.')
+plt.plot(range(points), amplitude, label='data')
 plt.legend()
 
 
