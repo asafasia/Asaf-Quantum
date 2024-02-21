@@ -12,7 +12,9 @@
   "q3": {
     "T1": 6e6,
     "T2": 6e6,
-    "rc": 1.06e-2
+    "rc": 1.06e-2,
+    "gate_fidelity": 0.01,
+    "readout_fidelity": 0.9
   },
   "q4": {
     "T1": 6e6,

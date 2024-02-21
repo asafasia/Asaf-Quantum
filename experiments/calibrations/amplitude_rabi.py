@@ -1,16 +1,13 @@
 from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
-
 import matplotlib.pyplot as plt
-
 from scipy.optimize import curve_fit
-
 from helper.kernels import kernels
 from helper.exp_helper import *
 from helper.pulses import *
 from qubit_parameters import qubit_parameters, update_qp
 
 # %% parameters
-qubit = "q1"
+qubit = "q3"
 
 mode = 'disc'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
@@ -35,12 +32,11 @@ session.connect(do_emulation=False)
 
 # %% amplitude sweep
 simulate = False
-steps = 300
+steps = 100
 pis = 4
 n_avg = 1000
 plot_from_json = False
 sweep_rabi_amp = LinearSweepParameter(start=0, stop=1, count=steps)
-
 
 # %% Experiment Definition
 def amplitude_rabi(amplitude_sweep):
@@ -86,7 +82,7 @@ exp_rabi.set_signal_map(signal_map_default)
 # %%
 compiled_rabi = session.compile(exp_rabi)
 if simulate:
-    plot_simulation(compiled_rabi, start_time=0, length=15e-6)
+    plot_simulation(compiled_rabi, start_time=0, length=1e-6,signals=[f'drive_{qubit}', f'measure'])
 
 # %% Run
 rabi_results = session.run()
@@ -95,7 +91,6 @@ rabi_results = session.run()
 acquire_results = rabi_results.get_data("amp_rabi")
 amplitude = np.abs(acquire_results)
 rabi_amp = sweep_rabi_amp.values * qubit_parameters[qubit]["pi_amp"] * pis
-
 
 def cos_wave(x, amplitude, T, phase, offset):
     return amplitude * np.cos(2 * np.pi / T * x + phase) + offset

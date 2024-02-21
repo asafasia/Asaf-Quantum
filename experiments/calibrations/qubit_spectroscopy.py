@@ -18,7 +18,7 @@ import scipy.optimize as opt
 
 
 # %% parameters
-qubit = "q3"
+qubit = "q1"
 
 mode = 'spec'
 modulation_type = 'hardware' if mode == 'spec' else 'software'
@@ -50,7 +50,6 @@ simulate = False
 n_avg = 300
 amp = 1 / 5  # ~0.4 (q3) for 2nd E level, 1/100 for 1st E level
 w0 = True
-plot_from_json = False
 center_axis = True
 ground_max = False
 p = 1

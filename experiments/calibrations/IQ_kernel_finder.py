@@ -4,6 +4,7 @@ from helper.exp_helper import *
 from pulses import *
 from qubit_parameters import *
 from laboneq.contrib.example_helpers.plotting.plot_helpers import plot_simulation
+from helper.kernels import kernels
 
 # %% devise setup
 qubit = "q1"
@@ -104,7 +105,7 @@ m0 = np.mean(np.abs(raw_0))
 m1 = np.mean(np.abs(raw_1))
 
 time = np.linspace(0, len(raw_0) / 2, len(raw_0))
-plt.plot(time, np.abs(raw_0), alpha=0.5, label='ground')
+plt.plot(time, np.abs(raw_0), alpha=0.5, label='ground', )
 plt.plot(time, np.abs(raw_1), alpha=0.5, label='excited')
 plt.axhline(y=m0)
 plt.axhline(y=m1)
