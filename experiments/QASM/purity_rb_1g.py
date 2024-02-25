@@ -1,10 +1,7 @@
-# Import general libraries (needed for functions)
 import numpy as np
 import matplotlib.pyplot as plt
-# Import the RB Functions
 from qiskit_ignis_rb import randomized_benchmarking_seq
 from qubit_parameters import qubit_parameters
-# Import Qiskit classes
 from qiskit import assemble, transpile, qasm3
 from scipy.optimize import curve_fit
 

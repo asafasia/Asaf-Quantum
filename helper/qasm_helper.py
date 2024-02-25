@@ -74,22 +74,8 @@ def measurement(qubit: Qubit, kernel):
 
 
 def cz(control: Qubit, target: Qubit, coupler: Qubit):
-    """Return a controlled X gate for the specified control and target qubits.
-
-    The CX gate function takes no arguments and returns a LabOne Q section that performs
-    the controllex X gate.
-    """
-
     def cz_gate():
         cz_id = f"cz_{control.uid}_{target.uid}"
-        #
-        # qubit_pair = (control.uid, target.uid)
-        # if qubit_pair in coupler_map:
-        #     coupler = coupler_map[qubit_pair]
-        #     c_object = coupler_dict[coupler]
-        #     # Assuming a function to get the coupler object
-        # else:
-        #     raise ValueError(f"No coupler found for qubits {control.uid} and {target.uid}")
         c_object = coupler
         gate = Section(uid=id_generator(cz_id))
 
