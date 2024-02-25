@@ -11,29 +11,40 @@ from qubit_parameters import qubit_parameters, update_qp
 
 
 class QubitSpectroscopy:
-    def __init__(self, qubit, n_avg, span, amp, steps, w0, center_axis, ground_max, simulate, p, update_flux,
-                 mode='spec', ):
-        self.qubit = qubit
-        self.flux_bias = qubit_parameters[qubit]['flux_bias']
+    def __init__(
+            self,
+            qubit,
+            n_avg,
+            span,
+            amp,
+            steps,
+            w0,
+            center_axis,
+            ground_max,
+            simulate,
+            p,
+            update_flux,
+            mode='spec'
+    ):
         self.mode = mode
-
         self.modulation_type = 'hardware' if mode == 'spec' else 'software'
         self.acquisition_type = AcquisitionType.SPECTROSCOPY if mode == 'spec' else AcquisitionType.DISCRIMINATION
         self.kernel = readout_pulse(qubit) if mode == 'spec' else kernels[qubit]
-
         exp = initialize_exp()
-
         self.device_setup = exp.create_device_setup(self.modulation_type)
         self.exp_signals = exp.signals(qubit)
         self.signal_map_default = exp.signal_map_default(qubit)
-
         self.session = Session(device_setup=self.device_setup)
         self.session.connect(do_emulation=False)
+
+        self.qubit = qubit
+        self.flux_bias = qubit_parameters[qubit]['flux_bias']
+        self.gradient = 0
 
         self.update_flux = update_flux
         self.simulate = simulate
         self.n_avg = n_avg
-        self.amp = amp  # ~0.4 (q3) for 2nd E level, 1/100 for 1st E level
+        self.amp = amp
         self.w0 = w0
         self.center_axis = center_axis
         self.ground_max = ground_max
@@ -55,6 +66,8 @@ class QubitSpectroscopy:
         self.freq_sweep = SweepParameter(uid=f'freq_sweep_{qubit}', values=self.dfs - drive_LO)  # sweep object
 
         self.alpha = (qubit_parameters[qubit]['qb_freq'] - qubit_parameters[qubit]['w125']) * 2
+        self.flux_dict = [self.flux_bias]
+        self.resonance_dict = []
 
     def _update_vector(self):
         qubit = self.qubit
@@ -179,6 +192,9 @@ class QubitSpectroscopy:
         if self.update_flux and self.w0 == True:
             print('old_flux_point = :', self.flux_bias)
 
+            print('delta flux = ', 1e-2 * self.p * detuning * 1e-6 * self.flux_bias)
+            print('delta flux from gradient = ', self.gradient)
+
             new_flux_bias = self.flux_bias * (1 + 1e-2 * self.p * detuning * 1e-6)
             print('new_flux_point = :', new_flux_bias)
 
@@ -190,10 +206,17 @@ class QubitSpectroscopy:
                 self.flux_bias = new_flux_bias
                 print('updated !!!')
 
+                self.resonance_dict.append(self.max_freq)
+                self.find_gradient()
+                self.flux_dict.append(self.flux_dict)
+
+
             elif user_input == 'n':
                 print('not_updated')
             else:
                 raise Exception("Invalid input")
+
+
         else:
             user_input = input("Do you want to update the ***frequency***? [y/n]")
 
@@ -216,9 +239,13 @@ class QubitSpectroscopy:
 
         self._update_vector()
 
+    def find_gradient(self):
+        if self.resonance_dict >= 2 and self.flux_dict >= 2:
+            self.gradient = (self.resonance_dict[-1] - self.resonance_dict[-2]) / (
+                    self.flux_dict[-1] - self.flux_dict[-2])
+
 
 if __name__ == '__main__':
-
 
     # %%
     args = {
@@ -243,4 +270,3 @@ if __name__ == '__main__':
         print('number: ', i)
         qs.run_exp()
         qs.update()
-
