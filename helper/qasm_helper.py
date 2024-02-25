@@ -1,9 +1,5 @@
-from laboneq.contrib.example_helpers.plotting.plot_helpers import *
-from laboneq._utils import id_generator
-from qiskit import qasm3, QuantumCircuit
-from math import pi
 
-from helper import pulses
+
 from helper.exp_helper import *
 from helper.kernels import kernels
 from helper.pulses import *
@@ -22,97 +18,7 @@ coupler_map = {
 couplers = ["c13", "c23", "c43", "c53"]
 
 
-def drive_pulse(qubit: Qubit, label):
-    return pulse_library.const(
-        uid=f"{qubit.uid}_{label}",
-        length=qubit.parameters.user_defined["pulse_length"],
-        amplitude=qubit.parameters.user_defined["amplitude_pi"],
-    )
 
-
-def drive_pulse_root(qubit: Qubit, label):
-    return pulse_library.const(
-        uid=f"{qubit.uid}_{label}",
-        length=qubit.parameters.user_defined["pulse_length"],
-        amplitude=qubit.parameters.user_defined["amplitude_pi"] / 2
-    )
-
-
-def rz(qubit: Qubit):
-    def rz_gate(angle: float):
-        gate = Section(uid=id_generator(f"p_{qubit.uid}_rz_{int(180 * angle / pi)}"))
-        gate.play(
-            signal=qubit.signals["drive"],
-            pulse=None,
-            increment_oscillator_phase=angle,
-        )
-        return gate
-
-    return rz_gate
-
-
-def measurement(qubit: Qubit, kernel):
-    def measurement_gate(handle: str):
-        gate = Section(uid=id_generator(f"meas_{qubit.uid}_{handle}"),
-                       trigger={"measure": {"state": True}})
-
-        gate.reserve(signal=qubit.signals["drive"])
-
-        gate.play(signal=qubit.signals["measure"], pulse=readout_pulse(qubit.uid),
-                  phase=qubit.parameters.user_defined["angle"])
-
-        gate.acquire(
-            signal=qubit.signals["acquire"],
-            handle=handle,
-            kernel=kernel,
-        )
-        gate.delay(signal=qubit.signals["measure"], time=120e-6)
-
-        return gate
-
-    return measurement_gate
-
-
-def cz(control: Qubit, target: Qubit, coupler: Qubit):
-    def cz_gate():
-        cz_id = f"cz_{control.uid}_{target.uid}"
-        c_object = coupler
-        gate = Section(uid=id_generator(cz_id))
-
-        flux_section = Section(uid=id_generator('flux_pulse'))
-
-        flux_section.play(
-            signal=c_object.signals["flux"],
-            pulse=flux_pulse(c_object.uid),
-            length=80e-9
-        )
-
-        gate.add(flux_section)
-
-        phase_shift_cancel_section = Section(uid=id_generator(f"p_{control.uid}_phase_shift_cancellation"),
-                                             play_after=flux_section)
-
-        phase_shift_cancel_section.play(
-            signal=control.signals["drive"],
-            pulse=None,
-            increment_oscillator_phase=qubit_parameters[control.uid]['cz_phase_shift'],
-        )
-
-        phase_shift_cancel_section.play(
-            signal=control.signals["drive"],
-            pulse=pulses.pi_pulse(control.uid),
-        )
-
-        phase_shift_cancel_section.play(
-            signal=target.signals["drive"],
-            pulse=None,
-            increment_oscillator_phase=qubit_parameters[target.uid]['cz_phase_shift'],
-        )
-        gate.add(phase_shift_cancel_section)
-
-        return gate
-
-    return cz_gate
 
 
 class QuantumProcessor:
@@ -164,7 +70,6 @@ class QuantumProcessor:
             )
 
             qubit_map[f'q[{i}]'] = qubit_obj
-            # qubit_map[]
         self.qubit_map = qubit_map
 
         coupler_map = {}
@@ -201,12 +106,13 @@ class QuantumProcessor:
             self.gate_store.register_gate_section("measure", (oq3_qubit,),
                                                   measurement(l1q_qubit, self.kernels[l1q_qubit.uid]))
 
-        # self.gate_store.register_gate_section("cz",
-        #                                       ("q[0]", "q[1]"),
-        #                                       cz(self.qubit_map["q[0]"], self.qubit_map["q[1]"],
-        #                                          self.coupler_map["c[0]"]))
-        # print(self.coupler_map)
-        # self.qubit_map.update(self.coupler_map)
+        if len(self.qubits) > 0:
+            self.gate_store.register_gate_section("cz",
+                                                  ("q[0]", "q[1]"),
+                                                  cz(self.qubit_map["q[0]"], self.qubit_map["q[1]"],
+                                                     self.coupler_map["c[0]"]))
+            print(self.coupler_map)
+            self.qubit_map.update(self.coupler_map)
 
     def add_experiment(self, qasm_circs):
         exp = exp_from_qasm_list(
